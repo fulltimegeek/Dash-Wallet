@@ -1,0 +1,62 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+    android:paddingBottom="@dimen/activity_vertical_margin">
+
+    <TextView
+        android:id="@+id/tv_title_receiving"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:background="@color/theme_default"
+        android:text="RECEIVE"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:background="#333"
+        android:layout_below="@id/tv_title_receiving"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/img_qr_receive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/tv_receiving_address"
+        android:gravity="center_horizontal"
+        android:textSize="16sp"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:textStyle="bold"
+        android:textColor="#444"
+        android:layout_below="@id/img_qr_receive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:gravity="center"
+        android:layout_below="@id/tv_receiving_address"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_share_receive"
+            android:text="SHARE"
+            android:layout_weight=".5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_cancel_receive"
+            android:text="CANCEL"
+            android:layout_weight=".5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+
+
+</RelativeLayout>

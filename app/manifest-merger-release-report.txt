@@ -1,0 +1,49 @@
+-- Merging decision tree log ---
+manifest
+ADDED from AndroidManifest.xml:2:1
+	xmlns:android
+		ADDED from AndroidManifest.xml:2:11
+	package
+		ADDED from AndroidManifest.xml:3:5
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionName
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionCode
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+application
+ADDED from AndroidManifest.xml:5:5
+	android:label
+		ADDED from AndroidManifest.xml:8:9
+	android:allowBackup
+		ADDED from AndroidManifest.xml:6:9
+	android:icon
+		ADDED from AndroidManifest.xml:7:9
+activity#dash.fulltimegeek.walletspv.MainActivity
+ADDED from AndroidManifest.xml:9:9
+	android:label
+		ADDED from AndroidManifest.xml:11:13
+	android:name
+		ADDED from AndroidManifest.xml:10:13
+category#android.intent.category.HOME
+ADDED from AndroidManifest.xml:12:13
+	android:name
+		ADDED from AndroidManifest.xml:12:23
+category#android.intent.category.DEFAULT
+ADDED from AndroidManifest.xml:13:13
+	android:name
+		ADDED from AndroidManifest.xml:13:23
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:14:13
+	android:name
+		ADDED from AndroidManifest.xml:14:23
+uses-sdk
+INJECTED from AndroidManifest.xml:0:0 reason: use-sdk injection requested
+	android:targetSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:minSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
