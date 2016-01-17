@@ -473,7 +473,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onWalletChanged(Wallet wallet) {
-        Log.i(TAG,"onWalletChanged calling guiUpdate");
+        Log.i(TAG,"onWalletChanged calling updateBalance");
         updateBalance();
     }
 
@@ -489,7 +489,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-        Log.i(TAG,"onCoinsReceived calling guiUpdate");
+        Log.i(TAG,"onCoinsReceived calling updateBalance");
         updateBalance();
     }
 
