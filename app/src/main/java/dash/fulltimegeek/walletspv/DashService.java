@@ -46,7 +46,7 @@ public class DashService extends Service implements NewBestBlockListener{
         kit = new DashKit(params, getFilesDir(), "checkpoint") {
             @Override
             protected void onShutdownCompleted() {
-                Log.i(TAG, "DashKit shutdown completed...");
+                Log.i(TAG, "DashKit shutdown completed....");
                 if (restoringCheckpoint) {
                     createCheckpoint(true);
                     startSyncing();

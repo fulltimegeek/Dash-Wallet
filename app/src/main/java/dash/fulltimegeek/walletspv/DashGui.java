@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -383,14 +384,20 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                     } else if (waitingToImport) {
                         try {
                             DumpedPrivateKey dumpKey = new DumpedPrivateKey(service.params, qrInfo.getHost());
-                            if (service.kit.wallet().importKey(dumpKey.getKey())) {
-                                Toast.makeText(activity, "Succesfully imported", Toast.LENGTH_LONG).show();
-                            } else {
-                                Toast.makeText(activity, "Failed to import key", Toast.LENGTH_LONG).show();
-                            }
                             resetWaiting();
+                            if(service != null && service.kit != null && service.kit.wallet() != null) {
+                                boolean imported = service.kit.wallet().importKey(dumpKey.getKey());
+                                if(imported){
+                                    showToast("Success: Key Imported");
+                                }else{
+                                    showToast("Success: Key Already In Wallet");
+                                }
+                            }else{
+                                showToast("Failure: Could not connect to wallet");
+                            }
                         } catch (org.bitcoinj.core.AddressFormatException e) {
-                            Toast.makeText(activity, "Failed to import key", Toast.LENGTH_LONG).show();
+                            showToast("Failure: Key Not Imported");
+                            e.printStackTrace();
                         }
                     }
                 } catch (UnsupportedOperationException e) {
@@ -623,12 +630,20 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     public void showToast(final String string) {
-        activity.runOnUiThread(new Runnable() {
+        Log.i(TAG,"Showing toast:"+string);
+        Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(activity, string, Toast.LENGTH_LONG).show();
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Looper.prepare();
+                Toast.makeText(getBaseContext(), string, Toast.LENGTH_LONG).show();
             }
         });
+        t.start();
     }
 
     public void sendDash(String amount, String recipient, boolean isIX) {
