@@ -1,18 +1,18 @@
 package dash.fulltimegeek.walletspv;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Looper;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,30 +28,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.bitcoin.core.AddressFormatException;
-import com.google.bitcoin.core.Base58;
+import com.google.common.util.concurrent.Service;
 import com.google.zxing.BarcodeFormat;
-import com.google.zxing.Dimension;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.Writer;
 import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-import com.google.zxing.oned.Code128Writer;
-import com.google.zxing.oned.Code39Writer;
-import com.google.zxing.oned.EAN13Writer;
-import com.google.zxing.oned.EAN8Writer;
-import com.google.zxing.oned.ITFWriter;
-import com.google.zxing.oned.UPCAWriter;
-import com.google.zxing.qrcode.QRCodeWriter;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.google.zxing.qrcode.encoder.ByteMatrix;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.BitcoinSerializer;
 import org.bitcoinj.core.Block;
-import org.bitcoinj.core.CheckpointManager;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.DumpedPrivateKey;
 import org.bitcoinj.core.ECKey;
@@ -64,41 +49,24 @@ import org.bitcoinj.core.Peer;
 import org.bitcoinj.core.PeerAddress;
 import org.bitcoinj.core.StoredBlock;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.Wallet;
-import org.bitcoinj.crypto.EncryptedData;
 import org.bitcoinj.crypto.KeyCrypter;
 import org.bitcoinj.crypto.KeyCrypterException;
 import org.bitcoinj.crypto.MnemonicCode;
-import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.TestNet2Params;
-import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.script.Script;
-import org.bitcoinj.store.BlockStoreException;
-import org.bitcoinj.store.SPVBlockStore;
 import org.bitcoinj.utils.MonetaryFormat;
-import org.bitcoinj.wallet.DeterministicSeed;
-import org.bitcoinj.wallet.Protos;
 import org.spongycastle.crypto.params.KeyParameter;
-import org.spongycastle.crypto.util.SubjectPublicKeyInfoFactory;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringBufferInputStream;
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -107,14 +75,15 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 
-public class MainActivity extends Activity implements PeerDataEventListener, PeerConnectionEventListener, WalletEventListener, NewBestBlockListener, Button.OnClickListener {
+public class DashGui extends Activity implements PeerDataEventListener, PeerConnectionEventListener, WalletEventListener, NewBestBlockListener, Button.OnClickListener {
 
-    final static String TAG = "MainActivity.javaa";
-    static public MainActivity activity;
+    final static String TAG = "DashGui.java";
+    static public DashGui activity;
+    DashService service = null;
     final static int MENU_MAIN = 0;
     final static int MENU_OTHER = 1;
-    NetworkParameters params;
-    DashKit kit;
+    //NetworkParameters params;
+    //DashKit kit;
     IntentIntegrator scanIntegrator;
     TextView tvBalance;
     TextView tvPending;
@@ -133,12 +102,13 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
     ImageView logo;
     static boolean waitingToSend = false;
     static boolean waitingToImport = false;
+    static boolean isBound =  false;
     Button scanSend;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i(TAG,"DASH-SPV STARTING....");
+        Log.i(TAG, "DASH-SPV STARTING....");
         setContentView(R.layout.activity_main);
         activity = this;
         setupDialogs();
@@ -150,41 +120,69 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         } catch (IOException e) {
             e.printStackTrace();
         }
-        params = MainNetParams.get();
-        createCheckpoint(false);
-        kit = new DashKit(params, getFilesDir(), "checkpoint") {
-            @Override
-            protected  void onShutdownCompleted(){
-                if(restoringCheckpoint) {
-                    Log.i(TAG,"Restoring Checkpoint...");
-                    Looper.prepare();
-                    createCheckpoint(true);
-                    startSyncing();
-                }
-            }
-            @Override
-            protected void onSetupCompleted() {
-                // This is called in a background thread after startAndWait is called, as setting up various objects
-                // can do disk and network IO that may cause UI jank/stuttering in wallet apps if it were to be done
-                // on the main thread.
-                wallet().addEventListener(activity);
-                vChain.addNewBestBlockListener(activity);
-                updateBlockHeight(vChain.getChainHead());
-                updateGUI();
-                this.peerGroup().addConnectionEventListener(activity);
-                progress.dismiss();
 
-            }
-        };
-        startSyncing();
+        createCheckpoint(false);
+
+        if(!isDashServiceRunning()){
+            Log.i(TAG,"DashService was not running ... starting");
+            startService(new Intent(this,DashService.class));
+        }else{
+            Log.i(TAG,"DashService was already running");
+        }
     }
 
-    public static List<String> ConvertStringsToStringList(String items, String separator)
-    {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(progress != null)
+            progress.dismiss();
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        doBindService();
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        if(service != null){
+            service.gui = null;
+        }
+        if(isBound){
+            isBound = false;
+            unbindService(sConnection);
+        }
+    }
+
+    void doBindService() {
+        bindService(new Intent(DashGui.this, DashService.class),
+                sConnection, Context.BIND_AUTO_CREATE);
+    }
+
+    ServiceConnection sConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName classname, IBinder binder) {
+            Log.i("DashGui.java","onServiceConnected");
+            isBound = true;
+            service = ((DashService.LocalBinder) binder).getService();
+            service.gui = activity;
+            service.setListeners(activity);
+            updateGUI();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // TODO Auto-generated method stub
+
+        }//
+    };
+
+    public static List<String> ConvertStringsToStringList(String items, String separator) {
         List<String> list = new ArrayList<String>();
         String[] listItmes = items.split(separator);
-        for(String item : listItmes)
-        {
+        for (String item : listItmes) {
             list.add(item);
         }
         return list;
@@ -196,7 +194,8 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
     Button btnImport;
     Button btnRescan;
     Button btnMainMenu;
-    public void setupButtons(){
+
+    public void setupButtons() {
         btnOther = (Button) findViewById(R.id.btn_other);
         btnOther.setOnClickListener(this);
         btnSend = (Button) findViewById(R.id.btn_send);
@@ -223,7 +222,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         cbIx.setOnClickListener(this);
     }
 
-    public void setupDialogs(){
+    public void setupDialogs() {
         LayoutInflater inflater = LayoutInflater.from(activity);
         sendDialog = new Dialog(activity);
         sendDialog.setCancelable(true);
@@ -234,11 +233,11 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         receiveDialog = new Dialog(activity);
         receiveDialog.setCancelable(true);
         receiveDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        receiveDialog.setContentView(inflater.inflate(R.layout.layout_receiving,null));
+        receiveDialog.setContentView(inflater.inflate(R.layout.layout_receiving, null));
 
     }
 
-    public void setupTextViews(){
+    public void setupTextViews() {
         rlPending = (RelativeLayout) findViewById(R.id.rl_pending);
         llMenuButtons = (LinearLayout) findViewById(R.id.ll_menu_buttons);
         tvBalance = (TextView) findViewById(R.id.tv_balance);
@@ -254,17 +253,17 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         tvBlockHeight = (TextView) findViewById(R.id.tv_block_height);
     }
 
-    public void resetWaiting(){
+    public void resetWaiting() {
         waitingToImport = false;
         waitingToSend = false;
     }
 
-    public void createCheckpoint(boolean rebuild){
-        File chain = new File(getFilesDir(),"checkpoint.spvchain");
+    public void createCheckpoint(boolean rebuild) {
+        File chain = new File(getFilesDir(), "checkpoint.spvchain");
         OutputStream output = null;
-        if(!chain.exists() || rebuild){
+        if (!chain.exists() || rebuild) {
             try {
-                Log.i(TAG,"Restoring checkpoint");
+                Log.i(TAG, "Restoring checkpoint");
                 chain.createNewFile();
                 output = new FileOutputStream(chain);
                 InputStream input = getResources().openRawResource(R.raw.checkpoint);
@@ -279,10 +278,10 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                 } finally {
                     output.close();
                 }
-            }catch (IOException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
-                if(output != null){
+            } finally {
+                if (output != null) {
                     try {
                         output.close();
                     } catch (IOException e) {
@@ -293,16 +292,16 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         }
     }
 
-    public void updateGUI(){
+    public void updateBalance() {
         final int minConf = 1;
-        if(kit.wallet() != null) {
+        if (service != null && service.setupCompleted) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    tvBalance.setText(MonetaryFormat.BTC.format(kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)));
-                    if (kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).isPositive()) {
+                    tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)));
+                    if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).isPositive()) {
                         rlPending.setVisibility(View.VISIBLE);
-                        tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).getValue())) + ")");
+                        tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).getValue())) + ")");
                     } else {
                         rlPending.setVisibility(View.INVISIBLE);
 
@@ -312,12 +311,13 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         }
     }
 
-    public void sendCoins(String amount, String recipient,boolean isIX) {
-        if(isIX){
+
+    public void sendCoins(String amount, String recipient, boolean isIX) {
+        if (isIX) {
             BitcoinSerializer.names.remove(Transaction.class);
             BitcoinSerializer.names.put(Transaction.class, "ix");
             Transaction.REFERENCE_DEFAULT_MIN_TX_FEE = Transaction.DEFAULT_MIN_IX_FEE;
-        }else{
+        } else {
             BitcoinSerializer.names.remove(Transaction.class);
             BitcoinSerializer.names.put(Transaction.class, "tx");
             Transaction.REFERENCE_DEFAULT_MIN_TX_FEE = Transaction.DEFAULT_MIN_TX_FEE;
@@ -325,7 +325,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         Coin amountToSend = Coin.parseCoin(amount);
         //amountToSend.subtract(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE);
         try {
-            final Wallet.SendResult sendResult = kit.wallet().sendCoins(kit.peerGroup(), new Address(params, recipient), amountToSend);
+            final Wallet.SendResult sendResult = service.kit.wallet().sendCoins(service.kit.peerGroup(), new Address(service.params, recipient), amountToSend);
             sendResult.broadcastComplete.addListener(new Runnable() {
                 @Override
                 public void run() {
@@ -339,18 +339,17 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                     resetSendDialog();
                 }
             });
-        }catch (InsufficientMoneyException e){
+        } catch (InsufficientMoneyException e) {
             sendAlert("NOT ENOUGH FUNDS");
             e.printStackTrace();
-        }catch(NumberFormatException e){
+        } catch (NumberFormatException e) {
             sendAlert("CHECK NUMBER FORMAT");
             e.printStackTrace();
-        }catch(Wallet.DustySendRequested e){
+        } catch (Wallet.DustySendRequested e) {
             sendAlert("AMOUNT TOO LOW");
             e.printStackTrace();
         }
     }
-
 
 
     @Override
@@ -377,7 +376,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        if(intent != null) {
+        if (intent != null) {
             IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
             if (scanningResult != null) {
                 try {
@@ -406,14 +405,14 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                         resetWaiting();
                     } else if (waitingToImport) {
                         try {
-                            DumpedPrivateKey dumpKey = new DumpedPrivateKey(params, qrInfo.getHost());
-                            if (kit.wallet().importKey(dumpKey.getKey())) {
+                            DumpedPrivateKey dumpKey = new DumpedPrivateKey(service.params, qrInfo.getHost());
+                            if (service.kit.wallet().importKey(dumpKey.getKey())) {
                                 Toast.makeText(activity, "Succesfully imported", Toast.LENGTH_LONG).show();
                             } else {
                                 Toast.makeText(activity, "Failed to import key", Toast.LENGTH_LONG).show();
                             }
                             resetWaiting();
-                        }catch(org.bitcoinj.core.AddressFormatException e){
+                        } catch (org.bitcoinj.core.AddressFormatException e) {
                             Toast.makeText(activity, "Failed to import key", Toast.LENGTH_LONG).show();
                         }
                     }
@@ -474,7 +473,8 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
 
     @Override
     public void onWalletChanged(Wallet wallet) {
-        updateGUI();
+        Log.i(TAG,"onWalletChanged calling guiUpdate");
+        updateBalance();
     }
 
     @Override
@@ -489,7 +489,8 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
 
     @Override
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-        updateGUI();
+        Log.i(TAG,"onCoinsReceived calling guiUpdate");
+        updateBalance();
     }
 
     @Override
@@ -500,7 +501,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_other:
                 buildMenuButtons(MENU_OTHER);
                 break;
@@ -524,9 +525,9 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                 scanIntegrator.initiateScan();
                 break;
             case R.id.cb_ix:
-                if(cbIx.isChecked()) {
+                if (cbIx.isChecked()) {
                     tvIxFeeWarning.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     tvIxFeeWarning.setVisibility(View.INVISIBLE);
                 }
                 break;
@@ -534,12 +535,12 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                 shareQRCode();
                 break;
             case R.id.btn_receive:
-                if(kit != null && kit.wallet() != null) {
-                    updateReceiveQR("dash:" + kit.wallet().currentReceiveAddress().toString());
-                    tvReceivingAddress.setText(kit.wallet().currentReceiveAddress().toString());
+                if (service.kit != null && service.kit.wallet() != null) {
+                    updateReceiveQR("dash:" + service.kit.wallet().currentReceiveAddress().toString());
+                    tvReceivingAddress.setText(service.kit.wallet().currentReceiveAddress().toString());
                     receiveDialog.show();
-                }else{
-                    Toast.makeText(activity,"Wallet is still initializing...",Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(activity, "Wallet is still initializing...", Toast.LENGTH_LONG).show();
                 }
                 break;
             case R.id.btn_cancel_receive:
@@ -549,14 +550,14 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
                 sendDialog.show();
                 break;
             case R.id.btn_ok_send:
-                if(tvRecipient.getText()!=null &&
+                if (tvRecipient.getText() != null &&
                         tvRecipient.getText().toString() != "" &&
                         etAmountSending.getText().toString() != "" &&
-                        Float.parseFloat(etAmountSending.getText().toString()) > 0){
-                        sendDash(etAmountSending.getText().toString(),tvRecipient.getText().toString(),cbIx.isChecked());
-                }else if(tvRecipient.getText().toString().equals("")){
+                        Float.parseFloat(etAmountSending.getText().toString()) > 0) {
+                    sendDash(etAmountSending.getText().toString(), tvRecipient.getText().toString(), cbIx.isChecked());
+                } else if (tvRecipient.getText().toString().equals("")) {
                     sendAlert("ADD RECIPIENT");
-                }else if(etAmountSending.getText().toString() != "" || Float.parseFloat(etAmountSending.getText().toString())==0){
+                } else if (etAmountSending.getText().toString() != "" || Float.parseFloat(etAmountSending.getText().toString()) == 0) {
                     sendAlert("ENTER AMOUNT");
                 }
                 break;
@@ -569,7 +570,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         }
     }
 
-    public void updateReceiveQR(String content){
+    public void updateReceiveQR(String content) {
         //Encode with a QR Code image
         QREncoder qrCodeEncoder = new QREncoder(content,
                 null,
@@ -601,21 +602,22 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
             e.printStackTrace();
         }
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
-        share.putExtra(Intent.EXTRA_SUBJECT,"Dash Payment Request");
-        share.putExtra(Intent.EXTRA_TEXT,kit.wallet().currentReceiveAddress().toString());
+        share.putExtra(Intent.EXTRA_SUBJECT, "Dash Payment Request");
+        share.putExtra(Intent.EXTRA_TEXT, service.kit.wallet().currentReceiveAddress().toString());
         startActivity(share);
     }
 
     boolean restoringCheckpoint = false;
-    public void rescanFromCheckpoint(){
+
+    public void rescanFromCheckpoint() {
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    if(kit.wallet()!=null)
-                        kit.wallet().reset();
+                    if (service.kit.wallet() != null)
+                        service.kit.wallet().reset();
                     restoringCheckpoint = true;
-                    kit.shutdown();
+                    service.kit.shutdown();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -625,41 +627,41 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         t.start();
     }
 
-    public void rescan(){
+    public void rescan() {
 
     }
 
-    public void showToast(final String string){
+    public void showToast(final String string) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(activity,string,Toast.LENGTH_LONG).show();
+                Toast.makeText(activity, string, Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    public void sendDash(String amount, String recipient, boolean isIX){
+    public void sendDash(String amount, String recipient, boolean isIX) {
         String decrypt = "";
         KeyCrypter crypter = null;
         KeyParameter keyParameter = null;
-        if(kit.wallet().isEncrypted()) {
-            crypter = kit.wallet().getKeyCrypter();
+        if (service.kit.wallet().isEncrypted()) {
+            crypter = service.kit.wallet().getKeyCrypter();
             decrypt = "test";
             keyParameter = crypter.deriveKey(decrypt);
             try {
-                kit.wallet().decrypt(keyParameter);
-            }catch(KeyCrypterException e){
+                service.kit.wallet().decrypt(keyParameter);
+            } catch (KeyCrypterException e) {
                 e.printStackTrace();
             }
         }
-        if(!kit.wallet().isEncrypted()) {
+        if (!service.kit.wallet().isEncrypted()) {
             Coin minFee = Transaction.DEFAULT_MIN_TX_FEE;
             if (isIX) {
                 minFee = Transaction.DEFAULT_MIN_IX_FEE;
             }
-            if (!Coin.parseCoin(amount).isGreaterThan(isIX ? kit.wallet().getBalance().subtract(minFee) : kit.wallet().getBalance().subtract(minFee))) {
+            if (!Coin.parseCoin(amount).isGreaterThan(isIX ? service.kit.wallet().getBalance().subtract(minFee) : service.kit.wallet().getBalance().subtract(minFee))) {
                 if (isIX) {
-                    if (kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, 6).subtract(minFee).isPositive()) {
+                    if (service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, 6).subtract(minFee).isPositive()) {
                         sendCoins(amount, recipient, isIX);
                     } else {
                         sendAlert("IX -- CONF TOO LOW");
@@ -670,37 +672,47 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
             } else {
                 sendAlert("INSUFFICIENT FUNDS");
             }
-            if(!decrypt.equals("") && crypter != null && keyParameter != null){
-                kit.wallet().encrypt(crypter,keyParameter);
+            if (!decrypt.equals("") && crypter != null && keyParameter != null) {
+                service.kit.wallet().encrypt(crypter, keyParameter);
             }
         }
     }
 
-    ProgressDialog progress=null;
-    boolean ranStartAsync = false;
-    public void startSyncing(){
-            progress = new ProgressDialog(activity);
-            progress.setTitle("Please wait...");
-            progress.setMessage("Starting wallet");
-            progress.setCancelable(false);
-            progress.show();
+    ProgressDialog progress = null;
+    static boolean ranStartAsync = false;
 
+    /*public void startSyncing() {
         kit.setDownloadListener(this);
-        if(!ranStartAsync){
-            ranStartAsync=true;
+        if (!ranStartAsync) {
+            ranStartAsync = true;
             kit.startAsync();
-        }else{
+            showProgress("Please wait","Starting wallet");
+        } else {
             try {
+                showProgress("Please wait","Rescanning wallet");
                 kit.startup();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
+    }*/
+
+    private void showProgress(final String title, final String msg){
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                progress = new ProgressDialog(activity);
+                progress.setTitle(title+"...");
+                progress.setMessage(msg);
+                progress.setCancelable(false);
+                progress.show();
+            }
+        });
     }
 
-    private void removeMenuButtons(){
-        while(llMenuButtons.getChildAt(0) != null){
+    private void removeMenuButtons() {
+        while (llMenuButtons.getChildAt(0) != null) {
             llMenuButtons.removeViewAt(0);
         }
     }
@@ -711,7 +723,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
             llMenuButtons.addView(btnSend);
             llMenuButtons.addView(btnReceive);
             llMenuButtons.addView(btnOther);
-        }else if(whichMenu == MENU_OTHER){
+        } else if (whichMenu == MENU_OTHER) {
             llMenuButtons.addView(btnImport);
             llMenuButtons.addView(btnRescan);
             llMenuButtons.addView(btnMainMenu);
@@ -721,7 +733,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         }
     }
 
-    public void resetSendDialog(){
+    public void resetSendDialog() {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -737,7 +749,7 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         });
     }
 
-    public void sendAlert(final String string){
+    public void sendAlert(final String string) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -752,13 +764,32 @@ public class MainActivity extends Activity implements PeerDataEventListener, Pee
         updateBlockHeight(block);
     }
 
-    public void updateBlockHeight(final StoredBlock block){
+    public void updateBlockHeight(final StoredBlock block) {
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 //tvBlockHeight.setText("" + kit.wallet().getLastBlockSeenHeight());
-                tvBlockHeight.setText("" +block.getHeight());
+                if(block != null) {
+                    tvBlockHeight.setText("" + block.getHeight());
+                }else if(service != null && service.setupCompleted){
+                    tvBlockHeight.setText(""+service.kit.chain().getBestChainHeight());
+                }
             }
         });
+    }
+
+    private boolean isDashServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (DashService.class.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void updateGUI(){
+        updateBalance();
+        updateBlockHeight(null);
     }
 }

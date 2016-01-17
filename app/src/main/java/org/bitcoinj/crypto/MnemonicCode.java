@@ -17,7 +17,6 @@
 
 package org.bitcoinj.crypto;
 
-import android.content.Context;
 import android.util.Log;
 
 import org.bitcoinj.core.Sha256Hash;
@@ -35,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import dash.fulltimegeek.walletspv.MainActivity;
+import dash.fulltimegeek.walletspv.DashGui;
 import dash.fulltimegeek.walletspv.R;
 
 import static org.bitcoinj.core.Utils.HEX;
@@ -81,7 +80,7 @@ public class MnemonicCode {
     }
 
     private static InputStream openDefaultWords() throws IOException {
-        InputStream stream = MainActivity.activity.getResources().openRawResource(R.raw.english);
+        InputStream stream = DashGui.activity.getResources().openRawResource(R.raw.english);
 
         if (stream == null)
             throw new FileNotFoundException("R.raw.english.txt");

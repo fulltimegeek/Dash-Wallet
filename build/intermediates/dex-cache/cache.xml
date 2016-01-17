@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio/1.6.0/98476622f10715998eacf9240d6b479f12c66143/okio-1.6.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="98476622f10715998eacf9240d6b479f12c66143">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/okio-1.6.0_e55a1c30dd61c742edb7e9e7ce8647be87f0cf10.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-android/1.7.13/3585a5be6e719c26404d48021918cefbc52571e1/slf4j-android-1.7.13.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="3585a5be6e719c26404d48021918cefbc52571e1">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/slf4j-android-1.7.13_51400264437c828c42a0d6459763d5c672c1f7b7.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp/okhttp/2.7.0/1477ec5caf8319ab4b51eb43553cd66aa86fdea5/okhttp-2.7.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="1477ec5caf8319ab4b51eb43553cd66aa86fdea5">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/okhttp-2.7.0_8a9b93c945e50ba47204141622da732522c861e4.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/3.0.0-beta-1/ac43bb808c3d6c735d0d4b4ce3c91d414ee0c7d8/protobuf-java-3.0.0-beta-1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="ac43bb808c3d6c735d0d4b4ce3c91d414ee0c7d8">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/protobuf-java-3.0.0-beta-1_bd3dd49b5948af8bf2298e5dea6c68bbd329e08f.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/net.jcip/jcip-annotations/1.0/afba4942caaeaf46aab0b976afd57cc7c181467e/jcip-annotations-1.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="afba4942caaeaf46aab0b976afd57cc7c181467e">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/jcip-annotations-1.0_4161ce616d2b2a4fa3f8684317724744a1bd0b0d.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.lambdaworks/scrypt/1.4.0/906506b74f30c8c20bccd9ed4a11112d8941fe87/scrypt-1.4.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="906506b74f30c8c20bccd9ed4a11112d8941fe87">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/scrypt-1.4.0_f61cb9a2477697b580a64b6bfef312c371d7026c.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.madgag.spongycastle/core/1.53.0.0/619f704791db186304325bd129b2e7ec34f77438/core-1.53.0.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="619f704791db186304325bd129b2e7ec34f77438">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/core-1.53.0.0_7eddb76f9651c2057f2946d2229ce48cf5836f7d.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.google.zxing/android-integration/3.2.1/87a3d7da33a6c633fb1ff30023dbf0d05e8ea74c/android-integration-3.2.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="87a3d7da33a6c633fb1ff30023dbf0d05e8ea74c">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/android-integration-3.2.1_907c346593b0794c6f4c73f28ca7e6dfa5409037.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.1/f7be08ec23c21485b9b5a1cf1654c2ec8c58168d/jsr305-3.0.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="f7be08ec23c21485b9b5a1cf1654c2ec8c58168d">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/jsr305-3.0.1_33c7500cf0e224e24c757521381964e37be3e225.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.13/7fcf30c25b8f4a9379b9dad0d3f487b25272c026/slf4j-api-1.7.13.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="7fcf30c25b8f4a9379b9dad0d3f487b25272c026">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/slf4j-api-1.7.13_52fec21df6e46cb891f8dfdebd0cad1cd2568feb.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/git/Dash-Wallet/app/libs/orchid-1.2.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="a923781a70218bc37c5f14f0e4a477ec04d8a733">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/orchid-1.2_10ce3ed5a60e9d20975e7ae36c3650c81cee4061.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/org.fusesource.leveldbjni/leveldbjni-all/1.8/707350a2eeb1fa2ed77a32ddb3893ed308e941db/leveldbjni-all-1.8.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="707350a2eeb1fa2ed77a32ddb3893ed308e941db">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/leveldbjni-all-1.8_3446a1327736de96d967c1d21f5e08d264540a54.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/19.0/6ce200f6b23222af3d8abb6b6459e6c44f4bb0e9/guava-19.0.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="6ce200f6b23222af3d8abb6b6459e6c44f4bb0e9">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/guava-19.0_7229383eccd47e618d0c11376f29ff8826c1d3e2.jar" />
+    </item>
+    <item
+        jar="/home/fulltimegeek/.gradle/caches/modules-2/files-2.1/com.google.zxing/core/3.2.1/2287494d4f5f9f3a9a2bb6980e3f32053721b315/core-3.2.1.jar"
+        jumboMode="false"
+        revision="19.1.0"
+        sha1="2287494d4f5f9f3a9a2bb6980e3f32053721b315">
+        <dex dex="/home/fulltimegeek/git/Dash-Wallet/app/build/intermediates/pre-dexed/debug/core-3.2.1_a2a77bf4d3f2f01f514ff8d280875fe24044987e.jar" />
+    </item>
+
+</items>
