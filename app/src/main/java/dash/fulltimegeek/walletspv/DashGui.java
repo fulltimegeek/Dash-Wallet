@@ -82,6 +82,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     DashService service = null;
     final static int MENU_MAIN = 0;
     final static int MENU_OTHER = 1;
+    static int currentMenu = MENU_MAIN;
+    final static int PROGRESS_NONE = -1;
+    final static int PROGRESS_STARTING = 0;
+    final static int PROGRESS_RESCANING =1;
+    static int currentProgress = PROGRESS_STARTING;
     //NetworkParameters params;
     //DashKit kit;
     IntentIntegrator scanIntegrator;
@@ -121,7 +126,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             e.printStackTrace();
         }
 
-        createCheckpoint(false);
 
         if(!isDashServiceRunning()){
             Log.i(TAG,"DashService was not running ... starting");
@@ -142,6 +146,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     protected void onResume(){
         super.onResume();
         doBindService();
+        buildMenuButtons(currentMenu);
+        showProgress(currentProgress);
     }
 
     @Override
@@ -258,57 +264,28 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         waitingToSend = false;
     }
 
-    public void createCheckpoint(boolean rebuild) {
-        File chain = new File(getFilesDir(), "checkpoint.spvchain");
-        OutputStream output = null;
-        if (!chain.exists() || rebuild) {
-            try {
-                Log.i(TAG, "Restoring checkpoint");
-                chain.createNewFile();
-                output = new FileOutputStream(chain);
-                InputStream input = getResources().openRawResource(R.raw.checkpoint);
-                try {
-                    byte[] buffer = new byte[4 * 1024]; // or other buffer size
-                    int read;
-
-                    while ((read = input.read(buffer)) != -1) {
-                        output.write(buffer, 0, read);
-                    }
-                    output.flush();
-                } finally {
-                    output.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (output != null) {
-                    try {
-                        output.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-    }
-
     public void updateBalance() {
         final int minConf = 1;
-        if (service != null && service.setupCompleted) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)));
-                    if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).isPositive()) {
-                        rlPending.setVisibility(View.VISIBLE);
-                        tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).getValue())) + ")");
-                    } else {
-                        rlPending.setVisibility(View.INVISIBLE);
+                    try {
+                        if (service != null && service.setupCompleted && service.kit != null && service.kit.wallet() != null) {
+                            tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)));
+                            if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).isPositive()) {
+                                rlPending.setVisibility(View.VISIBLE);
+                                tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).getValue())) + ")");
+                            } else {
+                                rlPending.setVisibility(View.INVISIBLE);
 
+                            }
+                        }
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
                     }
                 }
             });
-        }
+
     }
 
 
@@ -425,12 +402,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onBlocksDownloaded(Peer peer, Block block, @Nullable FilteredBlock filteredBlock, int blocksLeft) {
-
+        Log.i(TAG,"onBlocksDownloaded: "+blocksLeft);
     }
 
     @Override
     public void onChainDownloadStarted(Peer peer, int blocksLeft) {
-
+        Log.i(TAG,"onChainDownloadedStarted with blocks left: "+blocksLeft);
     }
 
     @Override
@@ -473,7 +450,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onWalletChanged(Wallet wallet) {
-        Log.i(TAG,"onWalletChanged calling updateBalance");
+        //Log.i(TAG,"onWalletChanged calling updateBalance");
         updateBalance();
     }
 
@@ -608,15 +585,16 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     boolean restoringCheckpoint = false;
-
+    static int rescanToBlock = 0;
     public void rescanFromCheckpoint() {
+       showProgress(PROGRESS_RESCANING);
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     if (service.kit.wallet() != null)
                         service.kit.wallet().reset();
-                    restoringCheckpoint = true;
+                    service.restoringCheckpoint = true;
                     service.kit.shutdown();
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -624,7 +602,20 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
             }
         });
-        t.start();
+        if(service != null && service.setupCompleted) {
+            rescanToBlock = service.kit.chain().getBestChainHeight();
+            t.start();
+        }
+    }
+
+    public void dismissProgress(){
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if(progress != null)
+                    progress.dismiss();
+            }
+        });
     }
 
     public void rescan() {
@@ -698,17 +689,30 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     }*/
 
-    private void showProgress(final String title, final String msg){
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                progress = new ProgressDialog(activity);
-                progress.setTitle(title+"...");
-                progress.setMessage(msg);
-                progress.setCancelable(false);
-                progress.show();
-            }
-        });
+    public void showProgress(final int type){
+        if(type != PROGRESS_NONE) {
+            currentProgress = type;
+            final String title = "Please Wait";
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    progress = new ProgressDialog(activity);
+                    progress.setTitle(title);
+                    progress.setCancelable(false);
+                    if (type == PROGRESS_STARTING) {
+                        final String msg = "Starting wallet";
+                        progress.setMessage(msg + "...");
+                    } else if (type == PROGRESS_RESCANING) {
+                        final String msg = "Rescanning chain";
+                        progress.setMessage(msg + "...");
+                    } else {
+                        final String msg = "Please wait";
+                        progress.setMessage(msg + "...");
+                    }
+                    progress.show();
+                }
+            });
+        }
     }
 
     private void removeMenuButtons() {
@@ -718,6 +722,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     public void buildMenuButtons(int whichMenu) {
+        currentMenu = whichMenu;
         removeMenuButtons();
         if (whichMenu == MENU_MAIN) {
             llMenuButtons.addView(btnSend);
@@ -738,12 +743,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             @Override
             public void run() {
                 scanSend.setVisibility(View.VISIBLE);
-                tvIxFeeWarning.setVisibility(View.INVISIBLE);
+                tvIxFeeWarning.setVisibility(View.VISIBLE);
                 tvAlertSend.setText("");
                 tvAlertSend.setVisibility(View.INVISIBLE);
                 tvRecipient.setVisibility(View.INVISIBLE);
                 tvRecipient.setText("");
-                cbIx.setChecked(false);
+                cbIx.setChecked(true);
                 etAmountSending.setText("0.000");
             }
         });
@@ -762,6 +767,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void notifyNewBestBlock(final StoredBlock block) throws VerificationException {
         updateBlockHeight(block);
+        if(block.getHeight() == rescanToBlock) {
+            if(currentProgress == PROGRESS_RESCANING) {
+                currentProgress = PROGRESS_NONE;
+                dismissProgress();
+            }
+        }
     }
 
     public void updateBlockHeight(final StoredBlock block) {
@@ -771,7 +782,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 //tvBlockHeight.setText("" + kit.wallet().getLastBlockSeenHeight());
                 if(block != null) {
                     tvBlockHeight.setText("" + block.getHeight());
-                }else if(service != null && service.setupCompleted){
+                }else if(service != null && service.kit != null && service.kit.chain() != null){
                     tvBlockHeight.setText(""+service.kit.chain().getBestChainHeight());
                 }
             }

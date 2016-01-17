@@ -12,6 +12,12 @@ import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.listeners.NewBestBlockListener;
 import org.bitcoinj.params.MainNetParams;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Created by fulltimegeek on 1/17/16.
  */
@@ -24,6 +30,7 @@ public class DashService extends Service implements NewBestBlockListener{
     static NetworkParameters params;
     final static String TAG = "DashService.java";
     boolean setupCompleted = false;
+    boolean restoringCheckpoint = false;
 
     @Override
     public void onCreate(){
@@ -33,16 +40,17 @@ public class DashService extends Service implements NewBestBlockListener{
 
     }
 
-    private void buildKit(){
+    public void buildKit(){
         Log.i(TAG, "DashKit building...");
+        createCheckpoint(false);
         kit = new DashKit(params, getFilesDir(), "checkpoint") {
             @Override
             protected void onShutdownCompleted() {
                 Log.i(TAG, "DashKit shutdown completed...");
-                /*if (restoringCheckpoint) {
+                if (restoringCheckpoint) {
                     createCheckpoint(true);
                     startSyncing();
-                }*/
+                }
             }
 
             @Override
@@ -53,6 +61,10 @@ public class DashService extends Service implements NewBestBlockListener{
                 setupCompleted = true;
                 vChain.addNewBestBlockListener(service);
                 if(gui!=null) {
+                    if(DashGui.currentProgress == DashGui.PROGRESS_STARTING) {
+                        DashGui.currentProgress = DashGui.PROGRESS_NONE;
+                        gui.dismissProgress();
+                    }
                     setListeners(gui);
                     gui.updateGUI();
                 }
@@ -100,11 +112,48 @@ public class DashService extends Service implements NewBestBlockListener{
     public boolean setListeners(DashGui gui){
         if(setupCompleted) {
             bestBlockListener = gui;
-            kit.wallet().addEventListener(gui);
-            kit.setDownloadListener(gui);
-            kit.peerGroup().addConnectionEventListener(gui);
+            if(kit != null)
+                kit.setDownloadListener(gui);
+            if(kit != null && kit.wallet() != null)
+                kit.wallet().addEventListener(gui);
+            if(kit.peerGroup() != null)
+                kit.peerGroup().addConnectionEventListener(gui);
             return true;
         }
         return false;
+    }
+
+    public void createCheckpoint(boolean rebuild) {
+        File chain = new File(getFilesDir(), "checkpoint.spvchain");
+        OutputStream output = null;
+        if (!chain.exists() || rebuild) {
+            try {
+                Log.i(TAG, "Restoring checkpoint");
+                chain.createNewFile();
+                output = new FileOutputStream(chain);
+                InputStream input = getResources().openRawResource(R.raw.checkpoint);
+                try {
+                    byte[] buffer = new byte[4 * 1024]; // or other buffer size
+                    int read;
+
+                    while ((read = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, read);
+                    }
+                    output.flush();
+                } finally {
+                    output.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (output != null) {
+                    try {
+                        output.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
     }
 }
