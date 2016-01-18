@@ -98,6 +98,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     TextView tvIxFeeWarning;
     TextView tvAlertSend;
     TextView tvBlockHeight;
+    TextView tvSendMsg;
     CheckBox cbIx;
     EditText etAmountSending;
     RelativeLayout rlPending;
@@ -258,6 +259,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         tvIxFeeWarning = (TextView) sendDialog.findViewById(R.id.tv_ix_fee);
         tvAlertSend = (TextView) sendDialog.findViewById(R.id.tv_alert_send);
         tvBlockHeight = (TextView) findViewById(R.id.tv_block_height);
+        tvSendMsg = (TextView) sendDialog.findViewById(R.id.tv_send_label);
     }
 
     public void resetWaiting() {
@@ -359,6 +361,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             if (scanningResult != null) {
                 try {
                     String scanContent = scanningResult.getContents();
+                    Log.i(TAG,scanContent);
                     String scanFormat = scanningResult.getFormatName();
                     scanContent = scanContent.replaceAll("dash:", "dash://");
                     if (!scanContent.contains("dash://")) {
@@ -379,6 +382,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         if (qrInfo.getQueryParameter("amount") != null) {
                             etAmountSending.setText(qrInfo.getQueryParameter("amount"));
 
+                        }
+                        if (qrInfo.getQueryParameter("message") != null){
+                            tvSendMsg.setText(qrInfo.getQueryParameter("message"));
+                            tvSendMsg.setVisibility(View.VISIBLE);
+                        }else if(qrInfo.getQueryParameter("label") != null){
+                            tvSendMsg.setText(qrInfo.getQueryParameter("label"));
+                            tvSendMsg.setVisibility(View.VISIBLE);
                         }
                         resetWaiting();
                     } else if (waitingToImport) {
