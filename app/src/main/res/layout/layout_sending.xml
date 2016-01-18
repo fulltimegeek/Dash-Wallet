@@ -100,7 +100,6 @@
             android:gravity="center"
             android:layout_marginTop="2dp"
             android:layout_marginRight="10dp"
-            android:layout_marginLeft="10dp"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/et_amount_send"
             android:layout_width="fill_parent"

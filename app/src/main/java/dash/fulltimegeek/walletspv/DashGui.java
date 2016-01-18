@@ -775,6 +775,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 tvRecipient.setVisibility(View.INVISIBLE);
                 tvRecipient.setText("");
                 cbIx.setChecked(true);
+                tvSendMsg.setText("");
+                tvSendMsg.setVisibility(View.GONE);
                 etAmountSending.setText("0.000");
             }
         });
