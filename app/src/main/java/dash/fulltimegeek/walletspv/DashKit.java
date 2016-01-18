@@ -14,10 +14,6 @@ public class DashKit extends WalletAppKit {
         super(params, directory, filePrefix);
     }
 
-    public DashKit(Context context, File directory, String filePrefix) {
-        super(context, directory, filePrefix);
-    }
-
     public void shutdown() throws Exception{
         super.shutDown();
         onShutdownCompleted();

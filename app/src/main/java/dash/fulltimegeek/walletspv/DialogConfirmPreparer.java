@@ -77,7 +77,6 @@ public class DialogConfirmPreparer {
 		int sp = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP,
 				12, context.getResources().getDisplayMetrics());
 		params.setMargins(dip, dip, dip, dip);
-		//Log.e("Resources", "Showing Dialog");
 		if (context.getResources() == null) {
 			Log.e("Resources", "Resources NULL");
 		} else if (context.getResources().getDrawable(R.drawable.btn_dialog_positive) == null) {

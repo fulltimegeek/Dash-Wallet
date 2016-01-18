@@ -10,7 +10,7 @@ public final class Contents {
     public static final class Type {
 
         // Plain text. Use Intent.putExtra(DATA, string). This can be used for URLs too, but string
-        // must include "http://" or "https://".
+        // must include "http://" or "https://"
         public static final String TEXT = "TEXT_TYPE";
 
         // An email type. Use Intent.putExtra(DATA, string) where string is the email address.
