@@ -388,6 +388,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                             if(service != null && service.kit != null && service.kit.wallet() != null) {
                                 boolean imported = service.kit.wallet().importKey(dumpKey.getKey());
                                 if(imported){
+                                    rescanFromCheckpoint();
                                     showToast("Success: Key Imported");
                                 }else{
                                     showToast("Success: Key Already In Wallet");
