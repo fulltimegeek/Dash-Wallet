@@ -746,10 +746,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             llMenuButtons.addView(btnOther);
         } else if (whichMenu == MENU_OTHER) {
             llMenuButtons.addView(btnImport);
-            llMenuButtons.addView(btnRescan);
+            //llMenuButtons.addView(btnRescan);
             llMenuButtons.addView(btnMainMenu);
             btnImport.setVisibility(View.VISIBLE);
-            btnRescan.setVisibility(View.VISIBLE);
+            //btnRescan.setVisibility(View.VISIBLE);
             btnMainMenu.setVisibility(View.VISIBLE);
         }
     }
