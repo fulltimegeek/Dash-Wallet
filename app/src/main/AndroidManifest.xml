@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="dash.fulltimegeek.walletspv"
-    android:versionCode="002"
+    android:versionCode="003"
     android:versionName="Dash Wallet(Alpha)">
 
     <uses-permission android:name="android.permission.INTERNET"/>
