@@ -30,6 +30,8 @@ public class DashService extends Service implements NewBestBlockListener{
     final static String TAG = "DashService.java";
     boolean setupCompleted = false;
     boolean restoringCheckpoint = false;
+    boolean restoringGenesis = false;
+    static final String checkpointName = "checkpoint";
 
     @Override
     public void onCreate(){
@@ -42,12 +44,16 @@ public class DashService extends Service implements NewBestBlockListener{
     public void buildKit(){
         Log.i(TAG, "DashKit building...");
         createCheckpoint(false);
-        kit = new DashKit(params, getFilesDir(), "checkpoint") {
+        kit = new DashKit(params, getFilesDir(), checkpointName) {
             @Override
             protected void onShutdownCompleted() {
                 Log.i(TAG, "DashKit shutdown completed....");
                 if (restoringCheckpoint) {
+                    restoringCheckpoint = false;
                     createCheckpoint(true);
+                    startSyncing();
+                }else if(restoringGenesis){
+                    deleteCheckpoint();
                     startSyncing();
                 }
             }
@@ -122,8 +128,13 @@ public class DashService extends Service implements NewBestBlockListener{
         return false;
     }
 
+    public boolean deleteCheckpoint(){
+        File chain = new File(getFilesDir(), checkpointName+".spvchain");
+        return chain.delete();
+    }
+
     public void createCheckpoint(boolean rebuild) {
-        File chain = new File(getFilesDir(), "checkpoint.spvchain");
+        File chain = new File(getFilesDir(), checkpointName+".spvchain");
         OutputStream output = null;
         if (!chain.exists() || rebuild) {
             try {

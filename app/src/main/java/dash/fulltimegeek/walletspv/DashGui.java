@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
@@ -83,6 +84,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     static int currentProgress = PROGRESS_STARTING;
     //NetworkParameters params;
     //DashKit kit;
+    DialogConfirmPreparer genesisScanConfirm;
     IntentIntegrator scanIntegrator;
     TextView tvBalance;
     TextView tvPending;
@@ -111,6 +113,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         Log.i(TAG, "DASH-SPV STARTING....");
         setContentView(R.layout.activity_main);
         activity = this;
+        setupConfirmers();
         setupDialogs();
         setupButtons();
         setupTextViews();
@@ -195,6 +198,17 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnImport;
     Button btnRescan;
     Button btnMainMenu;
+
+    public void setupConfirmers(){
+        genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(which == DialogConfirmPreparer.OK){
+                    rescanFromCheckpoint(false);
+                }
+            }
+        },"Rescan from Genesis","CANCEL","OK",true);
+    }
 
     public void setupButtons() {
         btnOther = (Button) findViewById(R.id.btn_other);
@@ -324,27 +338,32 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         }
     }
 
-
+    final static int MENU_BTN_RESCAN_CHECKPOINT = 1;
+    final static int MENU_BTN_RESCAN_GENESIS = 2;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
+        Log.i("MainScreen.java","Creating Options Menu");
+        menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
+        menu.add(0, MENU_BTN_RESCAN_GENESIS, MENU_BTN_RESCAN_GENESIS, "Rescan (Genesis)");
         return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case MENU_BTN_RESCAN_CHECKPOINT:
+                rescanFromCheckpoint(true);
+                break;
+
+            case MENU_BTN_RESCAN_GENESIS:
+                genesisScanConfirm.alert.show();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        //if (id == R.id.action_settings) {
-        //   return true;
-        //}
-
-        return super.onOptionsItemSelected(item);
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -391,7 +410,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                             if(service != null && service.kit != null && service.kit.wallet() != null) {
                                 boolean imported = service.kit.wallet().importKey(dumpKey.getKey());
                                 if(imported){
-                                    rescanFromCheckpoint();
+                                    rescanFromCheckpoint(true);
                                     showToast("Success: Key Imported");
                                 }else{
                                     showToast("Success: Key Already In Wallet");
@@ -498,10 +517,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 scanIntegrator.initiateScan();
                 break;
             case R.id.btn_rescan_chain:
-                rescanFromCheckpoint();
+                rescanFromCheckpoint(true);
                 break;
             case R.id.img_logo:
-                buildMenuButtons(MENU_MAIN);
+                //buildMenuButtons(MENU_MAIN);
+                openOptionsMenu();
                 break;
             case R.id.btn_main_menu:
                 buildMenuButtons(MENU_MAIN);
@@ -597,7 +617,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     boolean restoringCheckpoint = false;
     static int rescanToBlock = 0;
-    public void rescanFromCheckpoint() {
+    public void rescanFromCheckpoint(final boolean checkpoint) {
        showProgress(PROGRESS_RESCANING);
         Thread t = new Thread(new Runnable() {
             @Override
@@ -605,7 +625,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 try {
                     if (service.kit.wallet() != null)
                         service.kit.wallet().reset();
-                    service.restoringCheckpoint = true;
+                    service.restoringCheckpoint = checkpoint;
+                    service.restoringGenesis = !checkpoint;
                     service.kit.shutdown();
                 } catch (Exception e) {
                     e.printStackTrace();

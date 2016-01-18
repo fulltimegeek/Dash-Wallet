@@ -39,8 +39,9 @@ public class DialogConfirmPreparer {
 		this.cancelable = cancelable;
 		create();
 	}
-	
-	private void create(){
+
+
+    private void create(){
     	LayoutInflater inflater = context.getLayoutInflater();
        alert =  new AlertDialog.Builder(context).setCancelable(cancelable)
                 .setNegativeButton(android.R.string.ok, listener)
