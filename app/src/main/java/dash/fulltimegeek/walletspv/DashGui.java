@@ -81,9 +81,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_NONE = -1;
     final static int PROGRESS_STARTING = 0;
     final static int PROGRESS_RESCANING =1;
-    static int currentProgress = PROGRESS_STARTING;
-    //NetworkParameters params;
-    //DashKit kit;
+    static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
     IntentIntegrator scanIntegrator;
     TextView tvBalance;
@@ -106,6 +104,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     static boolean waitingToImport = false;
     static boolean isBound =  false;
     Button scanSend;
+    String walletPrefix = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,14 +122,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-
-        if(!isDashServiceRunning()){
-            Log.i(TAG,"DashService was not running ... starting");
-            startService(new Intent(this,DashService.class));
-        }else{
-            Log.i(TAG,"DashService was already running");
-        }
     }
 
     @Override
@@ -143,9 +134,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     protected void onResume(){
         super.onResume();
-        doBindService();
         buildMenuButtons(currentMenu);
         showProgress(currentProgress);
+        doBindService();
     }
 
     @Override
@@ -158,6 +149,26 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             isBound = false;
             unbindService(sConnection);
         }
+    }
+
+    public void promptCreateOrRestore(){
+
+    }
+
+    public void startDashService(){
+        if(service != null && !service.hasStarted()){
+            Log.i(TAG,"DashService was not running .... starting");
+            showProgress(PROGRESS_STARTING);
+            startService(new Intent(this,DashService.class));
+        }else{
+            Log.i(TAG,"DashService was already running");
+        }
+    }
+
+    public boolean defaultWalletExists(){
+        File file = new File(getFilesDir(),DashKit.defaultWalletAndChainPrefix+DashKit.defaultWalletExt);
+        Log.i(TAG,"Default wallet: "+file.getAbsolutePath());
+        return file.exists();
     }
 
     void doBindService() {
@@ -174,6 +185,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             service.gui = activity;
             service.setListeners(activity);
             updateGUI();
+            if(defaultWalletExists()){
+                startDashService(); // only starts if not already running
+            }else{
+                promptCreateOrRestore();
+            }
         }
 
         @Override

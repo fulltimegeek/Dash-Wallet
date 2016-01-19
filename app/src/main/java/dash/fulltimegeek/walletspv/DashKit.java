@@ -28,6 +28,9 @@ import javax.annotation.Nullable;
  */
 public class DashKit extends WalletAppKit {
     String walletPrefix = null;
+    final static String defaultWalletAndChainPrefix = "checkpoint";
+    final static String defaultWalletExt = ".wallet";
+    final static String defaultChainExt = ".spvchain";
     public DashKit(NetworkParameters params, File directory, String defaultPrefix, String walletPrefix) {
         super(params, directory, defaultPrefix);
         this.walletPrefix = walletPrefix;
@@ -37,6 +40,7 @@ public class DashKit extends WalletAppKit {
     @Override
     protected void startUp() throws Exception {
         // Runs in a separate thread.
+        Log.i(TAG,"DASHKIT STARTING");
         Context.propagate(context);
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
@@ -46,10 +50,10 @@ public class DashKit extends WalletAppKit {
         }
         log.info("Starting up with directory = {}", directory);
         try {
-            File chainFile = new File(directory, filePrefix + ".spvchain");
+            File chainFile = new File(directory, defaultWalletAndChainPrefix + defaultChainExt);
             boolean chainFileExists = chainFile.exists();
-            walletPrefix = walletPrefix==null?filePrefix:walletPrefix;
-            vWalletFile = new File(directory, walletPrefix + ".wallet");
+            walletPrefix = walletPrefix==null?defaultWalletAndChainPrefix:walletPrefix;
+            vWalletFile = new File(directory, walletPrefix + defaultWalletExt);
             boolean shouldReplayWallet = (vWalletFile.exists() && !chainFileExists) || restoreFromSeed != null;
             vWallet = createOrLoadWallet(shouldReplayWallet);
             // Initiate Bitcoin network objects (block store, blockchain and peer group)

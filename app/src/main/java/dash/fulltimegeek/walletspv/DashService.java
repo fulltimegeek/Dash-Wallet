@@ -31,8 +31,8 @@ public class DashService extends Service implements NewBestBlockListener{
     boolean setupCompleted = false;
     boolean restoringCheckpoint = false;
     boolean restoringGenesis = false;
-    static final String checkpointName = "checkpoint";
     String walletPrefix = null;
+    private boolean hasStarted = false;
 
     @Override
     public void onCreate(){
@@ -45,7 +45,7 @@ public class DashService extends Service implements NewBestBlockListener{
     public void buildKit(){
         Log.i(TAG, "DashKit building...");
         createCheckpoint(false);
-        kit = new DashKit(params, getFilesDir(), checkpointName, walletPrefix) {
+        kit = new DashKit(params, getFilesDir(), DashKit.defaultWalletAndChainPrefix, walletPrefix) {
             @Override
             protected void onShutdownCompleted() {
                 Log.i(TAG, "DashKit shutdown completed....");
@@ -81,6 +81,7 @@ public class DashService extends Service implements NewBestBlockListener{
 
     @Override
     public int onStartCommand(Intent intentt, int flags, int startId) {
+        hasStarted=true;
         buildKit();
         return START_STICKY;
     }
@@ -100,7 +101,8 @@ public class DashService extends Service implements NewBestBlockListener{
     public void onDestroy() {
         super.onDestroy();
         try {
-            kit.shutdown();
+            if(kit != null)
+                kit.shutdown();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,12 +142,12 @@ public class DashService extends Service implements NewBestBlockListener{
     }
 
     public boolean deleteCheckpoint(){
-        File chain = new File(getFilesDir(), checkpointName+".spvchain");
+        File chain = new File(getFilesDir(), DashKit.defaultWalletAndChainPrefix+".spvchain");
         return chain.delete();
     }
 
     public void createCheckpoint(boolean rebuild) {
-        File chain = new File(getFilesDir(), checkpointName+".spvchain");
+        File chain = new File(getFilesDir(), DashKit.defaultWalletAndChainPrefix+".spvchain");
         OutputStream output = null;
         if (!chain.exists() || rebuild) {
             try {
@@ -181,4 +183,6 @@ public class DashService extends Service implements NewBestBlockListener{
     public void setWalletPrefix(String prefix){
         walletPrefix = prefix;
     }
+
+    public boolean hasStarted(){return hasStarted;}
 }
