@@ -95,6 +95,16 @@ public class DashService extends Service implements NewBestBlockListener{
             bestBlockListener.notifyNewBestBlock(block);
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            kit.shutdown();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public class LocalBinder extends Binder {
         public DashService getService() {
             return DashService.this;
