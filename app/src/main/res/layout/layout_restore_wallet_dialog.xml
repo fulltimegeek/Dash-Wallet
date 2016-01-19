@@ -20,24 +20,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <Button
-            android:id="@+id/btn_restore_wallet_file"
-            android:text="From File"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
             android:id="@+id/btn_restore_wallet_seed"
             android:text="From Seed"
-            android:layout_marginTop="10dp"
             android:textSize="25sp"
             android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <Button
+            android:id="@+id/btn_restore_wallet_file"
+            android:layout_marginTop="10dp"
+            android:text="From File"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <Button
             android:id="@+id/btn_restore_wallet_cancel"
-            android:text="CANCEL"
+            android:text="Cancel"
             android:layout_marginTop="10dp"
             android:textSize="25sp"
             android:textStyle="bold"
