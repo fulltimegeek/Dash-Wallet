@@ -98,6 +98,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     LinearLayout llMenuButtons;
     Dialog sendDialog;
     Dialog receiveDialog;
+    Dialog initWalletDialog;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -151,9 +152,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         }
     }
 
-    public void promptCreateOrRestore(){
-
-    }
 
     public void startDashService(){
         if(service != null && !service.hasStarted()){
@@ -187,8 +185,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             updateGUI();
             if(defaultWalletExists()){
                 startDashService(); // only starts if not already running
-            }else{
-                promptCreateOrRestore();
+            }else if(!service.hasStarted()){
+                initWalletDialog.show();
             }
         }
 
@@ -214,6 +212,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnImport;
     Button btnRescan;
     Button btnMainMenu;
+    Button btnCreateNewWallet;
+    Button btnRestoreWallet;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -251,6 +251,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btn.setOnClickListener(this);
         cbIx = (CheckBox) sendDialog.findViewById(R.id.cb_ix);
         cbIx.setOnClickListener(this);
+        btnCreateNewWallet = (Button) initWalletDialog.findViewById(R.id.btn_create_new_wallet);
+        btnCreateNewWallet.setOnClickListener(this);
+        btnRestoreWallet = (Button) initWalletDialog.findViewById(R.id.btn_restore_wallet);
+        btnRestoreWallet.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -265,6 +269,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         receiveDialog.setCancelable(true);
         receiveDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         receiveDialog.setContentView(inflater.inflate(R.layout.layout_receiving, null));
+        initWalletDialog = new Dialog(activity);
+        initWalletDialog.setCancelable(false);
+        initWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        initWalletDialog.setContentView(inflater.inflate(R.layout.layout_init_wallet,null));
 
     }
 
@@ -525,6 +533,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.btn_create_new_wallet:
+                initWalletDialog.dismiss();
+                startDashService();
+                break;
             case R.id.btn_other:
                 buildMenuButtons(MENU_OTHER);
                 break;

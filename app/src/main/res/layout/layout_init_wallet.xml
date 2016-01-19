@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="#fff"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/tv_init_wallet_title"
+        android:textStyle="bold"
+        android:textColor="#fff"
+        android:textSize="28sp"
+        android:paddingRight="40dp"
+        android:paddingLeft="40dp"
+        android:background="@color/theme_default"
+        android:text="Initialize Wallet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <Button
+        android:id="@+id/btn_create_new_wallet"
+        android:text="Create New"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:id="@+id/btn_restore_wallet"
+        android:text="Restore"
+        android:layout_marginTop="10dp"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</LinearLayout>
