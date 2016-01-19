@@ -366,7 +366,7 @@ public class WalletAppKit extends AbstractIdleService {
         }
     }
 
-    private Wallet createOrLoadWallet(boolean shouldReplayWallet) throws Exception {
+    protected Wallet createOrLoadWallet(boolean shouldReplayWallet) throws Exception {
         Wallet wallet;
 
         maybeMoveOldWalletOutOfTheWay();
@@ -451,7 +451,7 @@ public class WalletAppKit extends AbstractIdleService {
      * As soon as the transaction broadcaster han been created we will pass it to the
      * payment channel extensions
      */
-    private void completeExtensionInitiations(TransactionBroadcaster transactionBroadcaster) {
+    protected void completeExtensionInitiations(TransactionBroadcaster transactionBroadcaster) {
         StoredPaymentChannelClientStates clientStoredChannels = (StoredPaymentChannelClientStates)
                 vWallet.getExtensions().get(StoredPaymentChannelClientStates.class.getName());
         if(clientStoredChannels != null) {
@@ -475,7 +475,7 @@ public class WalletAppKit extends AbstractIdleService {
             return new PeerGroup(params, vChain);
     }
 
-    private void installShutdownHook() {
+    protected void installShutdownHook() {
         if (autoStop) Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override public void run() {
                 try {
