@@ -32,6 +32,7 @@ public class DashService extends Service implements NewBestBlockListener{
     boolean restoringCheckpoint = false;
     boolean restoringGenesis = false;
     static final String checkpointName = "checkpoint";
+    String walletPrefix = null;
 
     @Override
     public void onCreate(){
@@ -44,7 +45,7 @@ public class DashService extends Service implements NewBestBlockListener{
     public void buildKit(){
         Log.i(TAG, "DashKit building...");
         createCheckpoint(false);
-        kit = new DashKit(params, getFilesDir(), checkpointName) {
+        kit = new DashKit(params, getFilesDir(), checkpointName, walletPrefix) {
             @Override
             protected void onShutdownCompleted() {
                 Log.i(TAG, "DashKit shutdown completed....");
@@ -175,5 +176,9 @@ public class DashService extends Service implements NewBestBlockListener{
                 }
             }
         }
+    }
+
+    public void setWalletPrefix(String prefix){
+        walletPrefix = prefix;
     }
 }
