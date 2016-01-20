@@ -1099,16 +1099,8 @@ public class Peer extends PeerSocketHandler {
                     break;
                 case TxLockVote:
                     //Log.w(TAG, "Not implemented: "+ item.type+" | "+item.toString());
-                    for(InventoryItem i: transactions){
-                        if(i.hash.toString().equals(item.hash.toString())){
-                            Log.i(TAG,"ER murr GURD -- I should be locking this tx | "+item.hash);
-                        }else{
-                            Log.i(TAG,"TX["+i.hash+"] doesn't match TX["+item.hash+"]");
-                        }
-                    }
                     break;
                 case TxLockRequest:
-                    Log.i(TAG, "TxLockRequest: "+ item.type+" | "+item.hash);
                     transactions.add(item);
                     break;
                 case DSTX:
