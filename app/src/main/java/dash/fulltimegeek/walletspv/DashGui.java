@@ -318,10 +318,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 public void run() {
                     try {
                         if (service != null && service.setupCompleted && service.kit != null && service.kit.wallet() != null) {
-                            tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)));
-                            if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).isPositive()) {
+                            tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance()));
+                            if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance()).isPositive()) {
                                 rlPending.setVisibility(View.VISIBLE);
-                                tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, minConf)).getValue())) + ")");
+                                tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance()).getValue())) + ")");
                             } else {
                                 rlPending.setVisibility(View.INVISIBLE);
 
@@ -349,7 +349,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         Coin amountToSend = Coin.parseCoin(amount);
         //amountToSend.subtract(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE);
         try {
-            final Wallet.SendResult sendResult = service.kit.wallet().sendCoins(service.kit.peerGroup(), new Address(service.params, recipient), amountToSend);
+            Wallet.SendRequest request = Wallet.SendRequest.to(new Address(service.params, recipient), amountToSend);
+            if(isIX)
+                request.coinSelector = new IXCoinSelector(); // We require inputs with
+                                                             // sufficient confs for IX to work
+            final Wallet.SendResult sendResult = service.kit.wallet().sendCoins(request);
             sendResult.broadcastComplete.addListener(new Runnable() {
                 @Override
                 public void run() {
@@ -743,7 +747,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             }
             if (!Coin.parseCoin(amount).isGreaterThan(isIX ? service.kit.wallet().getBalance().subtract(minFee) : service.kit.wallet().getBalance().subtract(minFee))) {
                 if (isIX) {
-                    if (service.kit.wallet().getBalance(Wallet.BalanceType.AVAILABLE, 6).subtract(minFee).isPositive()) {
+                    if (service.kit.wallet().getBalance(new IXCoinSelector()).subtract(minFee).isPositive()) {
                         sendCoins(amount, recipient, isIX);
                     } else {
                         sendAlert("IX -- CONF TOO LOW");

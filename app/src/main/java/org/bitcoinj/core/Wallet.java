@@ -17,8 +17,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import com.google.common.annotations.*;
 import com.google.common.base.*;
 import com.google.common.collect.*;
@@ -264,15 +262,11 @@ public class Wallet extends BaseTaggableObject
         this(Context.getOrCreate(params), keyChainGroup);
     }
 
-    static final String TAG = "Wallet.java";
     // TODO: When this class moves to the Wallet package, along with the protobuf serializer, then hide this.
     /** For internal use only. */
     public Wallet(Context context, KeyChainGroup keyChainGroup) {
         this.context = context;
         this.params = context.getParams();
-        if(keyChainGroup == null){
-            Log.e(TAG, "cant' create wallet b/c keyChainGroup is null");
-        }
         this.keyChainGroup = checkNotNull(keyChainGroup);
         if (params == UnitTestParams.get())
             this.keyChainGroup.setLookaheadSize(5);  // Cut down excess computation for unit tests.
@@ -1289,9 +1283,7 @@ public class Wallet extends BaseTaggableObject
      */
     public void saveToFile(File f) throws IOException {
         File directory = f.getAbsoluteFile().getParentFile();
-        Log.i(TAG, "Preparing to save in dir:"+directory.getAbsolutePath());
         File temp = File.createTempFile("wallet", null, directory);
-        Log.i(TAG, "Temp file created:"+temp.getAbsolutePath());
         saveToFile(temp, f);
     }
 
@@ -1583,8 +1575,6 @@ public class Wallet extends BaseTaggableObject
         }
     }
 
-
-
     /**
      * <p>Called when we have found a transaction (via network broadcast or otherwise) that is relevant to this wallet
      * and want to record it. Note that we <b>cannot verify these transactions at all</b>, they may spend fictional
@@ -1809,7 +1799,6 @@ public class Wallet extends BaseTaggableObject
         Coin valueSentFromMe = tx.getValueSentFromMe(this);
         Coin valueSentToMe = tx.getValueSentToMe(this);
         Coin valueDifference = valueSentToMe.subtract(valueSentFromMe);
-
 
         log.info("Received tx{} for {}: {} [{}] in block {}", sideChain ? " on a side chain" : "",
                 valueDifference.toFriendlyString(), tx.getHashAsString(), relativityOffset,
@@ -2225,7 +2214,7 @@ public class Wallet extends BaseTaggableObject
             }
         }
     }
-    public ArrayList<Sha256Hash> ixHashes = new ArrayList<Sha256Hash>();
+
     /**
      * Calls {@link Wallet#commitTx} if tx is not already in the pending pool
      *
@@ -3127,20 +3116,17 @@ public class Wallet extends BaseTaggableObject
      * means.
      */
     public Coin getBalance() {
-        return getBalance(BalanceType.AVAILABLE,-1);
+        return getBalance(BalanceType.AVAILABLE);
     }
 
-    public Coin getBalance(BalanceType balanceType) {
-        return getBalance(balanceType,-1);
-    }
     /**
      * Returns the balance of this wallet as calculated by the provided balanceType.
      */
-    public Coin getBalance(BalanceType balanceType, int minConf) {
+    public Coin getBalance(BalanceType balanceType) {
         lock.lock();
         try {
             if (balanceType == BalanceType.AVAILABLE || balanceType == BalanceType.AVAILABLE_SPENDABLE) {
-                List<TransactionOutput> candidates = calculateAllSpendCandidates(true, balanceType == BalanceType.AVAILABLE_SPENDABLE,minConf);
+                List<TransactionOutput> candidates = calculateAllSpendCandidates(true, balanceType == BalanceType.AVAILABLE_SPENDABLE);
                 CoinSelection selection = coinSelector.select(NetworkParameters.MAX_MONEY, candidates);
                 return selection.valueGathered;
             } else if (balanceType == BalanceType.ESTIMATED || balanceType == BalanceType.ESTIMATED_SPENDABLE) {
@@ -3673,7 +3659,7 @@ public class Wallet extends BaseTaggableObject
      * @throws CouldNotAdjustDownwards if emptying the wallet was requested and the output can't be shrunk for fees without violating a protocol rule.
      * @throws ExceededMaxTransactionSize if the resultant transaction is too big for Bitcoin to process (try breaking up the amounts of value)
      */
-    public void completeTx(SendRequest req) throws InsufficientMoneyException, DustySendRequested {
+    public void completeTx(SendRequest req) throws InsufficientMoneyException {
         lock.lock();
         try {
             checkArgument(!req.completed, "Given SendRequest has already been completed.");
@@ -3890,10 +3876,6 @@ public class Wallet extends BaseTaggableObject
      * @param excludeUnsignable Whether to ignore outputs that we are tracking but don't have the keys to sign for.
      */
     public List<TransactionOutput> calculateAllSpendCandidates(boolean excludeImmatureCoinbases, boolean excludeUnsignable) {
-        return calculateAllSpendCandidates(excludeImmatureCoinbases,excludeUnsignable,-1);
-    }
-
-    public List<TransactionOutput> calculateAllSpendCandidates(boolean excludeImmatureCoinbases, boolean excludeUnsignable,int minConf) {
         lock.lock();
         try {
             List<TransactionOutput> candidates;
@@ -3904,9 +3886,7 @@ public class Wallet extends BaseTaggableObject
                     Transaction transaction = checkNotNull(output.getParentTransaction());
                     if (excludeImmatureCoinbases && !transaction.isMature())
                         continue;
-                    if(output.getParentTransactionDepthInBlocks() >= minConf) {
-                        candidates.add(output);
-                    }
+                    candidates.add(output);
                 }
             } else {
                 candidates = calculateAllSpendCandidatesFromUTXOProvider(excludeImmatureCoinbases);
