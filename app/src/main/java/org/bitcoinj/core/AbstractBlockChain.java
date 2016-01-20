@@ -17,8 +17,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.common.util.concurrent.*;
@@ -424,12 +422,11 @@ public abstract class AbstractBlockChain {
      * @return The full set of all changes made to the set of open transaction outputs.
      */
     protected abstract TransactionOutputChanges connectTransactions(StoredBlock newBlock) throws VerificationException, BlockStoreException, PrunedException;    
-
+    
     // filteredTxHashList contains all transactions, filteredTxn just a subset
     private boolean add(Block block, boolean tryConnecting,
                         @Nullable List<Sha256Hash> filteredTxHashList, @Nullable Map<Sha256Hash, Transaction> filteredTxn)
             throws BlockStoreException, VerificationException, PrunedException {
-        //Log.i(TAG, "Attempting to add block: "+block.getHashAsString());
         // TODO: Use read/write locks to ensure that during chain download properties are still low latency.
         lock.lock();
         try {
@@ -522,8 +519,6 @@ public abstract class AbstractBlockChain {
     // expensiveChecks enables checks that require looking at blocks further back in the chain
     // than the previous one when connecting (eg median timestamp check)
     // It could be exposed, but for now we just set it to shouldVerifyTransactions()
-    int showBlockAddedInterval = 1000;
-    int showBlockCounter = 1;
     private void connectBlock(final Block block, StoredBlock storedPrev, boolean expensiveChecks,
                               @Nullable final List<Sha256Hash> filteredTxHashList,
                               @Nullable final Map<Sha256Hash, Transaction> filteredTxn) throws BlockStoreException, VerificationException, PrunedException {
@@ -568,11 +563,6 @@ public abstract class AbstractBlockChain {
                 txOutChanges = connectTransactions(storedPrev.getHeight() + 1, block);
             StoredBlock newStoredBlock = addToBlockStore(storedPrev,
                     block.transactions == null ? block : block.cloneAsHeader(), txOutChanges);
-            if( showBlockCounter % showBlockAddedInterval == 0) {
-                showBlockCounter=1;
-            }else{
-                showBlockCounter++;
-            }
             versionTally.add(block.getVersion());
             setChainHead(newStoredBlock);
             log.debug("Chain is now {} blocks high, running listeners", newStoredBlock.getHeight());

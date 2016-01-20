@@ -17,8 +17,6 @@
 
 package org.bitcoinj.wallet;
 
-import android.util.Log;
-
 import com.google.common.base.*;
 import com.google.common.collect.*;
 import com.google.protobuf.*;
@@ -131,12 +129,11 @@ public class KeyChainGroup implements KeyBag {
             chain.maybeLookAheadScripts();
         }
     }
-    final static String TAG = "KeyChainGroup.java";
+
     /** Adds a new HD chain to the chains list, and make it the default chain (from which keys are issued). */
     public void createAndActivateNewHDChain() {
         // We can't do auto upgrade here because we don't know the rotation time, if any.
         final DeterministicKeyChain chain = new DeterministicKeyChain(new SecureRandom());
-        Log.i(TAG, "Adding and activating new HD Chain");
         addAndActivateHDChain(chain);
     }
 

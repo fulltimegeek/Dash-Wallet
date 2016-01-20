@@ -16,8 +16,6 @@
 
 package org.bitcoinj.wallet;
 
-import android.util.Log;
-
 import org.bitcoinj.core.BloomFilter;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.crypto.*;
@@ -139,23 +137,16 @@ public class BasicKeyChain implements EncryptableKeyChain {
     public int importKeys(List<? extends ECKey> keys) {
         lock.lock();
         try {
-            Log.i("Wallet.java not BasicKeyChain","Trying to import key 2");
             // Check that if we're encrypted, the keys are all encrypted, and if we're not, that none are.
             // We are NOT checking that the actual password matches here because we don't have access to the password at
             // this point: if you screw up and import keys with mismatched passwords, you lose! So make sure the
             // password is checked first.
             for (ECKey key : keys) {
-                Log.i("Wallet.java not BasicKeyChain.java","checking key encryption: "+key);
                 checkKeyEncryptionStateMatches(key);
-                Log.i("Wallet.java not BasicKeyChain.java","Encryption passed: "+key);
             }
             List<ECKey> actuallyAdded = new ArrayList<ECKey>(keys.size());
             for (final ECKey key : keys) {
-                if (hasKey(key)){
-                    Log.i("Wallet.java not BasicKeyChain.java","Skipping key:"+key);
-                    continue;
-                }
-                Log.i("Wallet.java not BasicKeyChain.java","Actually adding: "+key);
+                if (hasKey(key)) continue;
                 actuallyAdded.add(key);
                 importKeyLocked(key);
             }

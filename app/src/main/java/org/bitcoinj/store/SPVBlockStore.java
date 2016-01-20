@@ -16,8 +16,6 @@
 
 package org.bitcoinj.store;
 
-import android.util.Log;
-
 import org.bitcoinj.core.*;
 import org.bitcoinj.utils.*;
 import org.slf4j.*;
@@ -80,7 +78,7 @@ public class SPVBlockStore implements BlockStore {
     // Used to stop other applications/processes from opening the store.
     protected FileLock fileLock = null;
     protected RandomAccessFile randomAccessFile = null;
-    final static String TAG = "SPVBlockStore.java";
+
     /**
      * Creates and initializes an SPV block store. Will create the given file if it's missing. This operation
      * will block on disk.

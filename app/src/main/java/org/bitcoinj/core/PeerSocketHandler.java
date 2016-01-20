@@ -16,8 +16,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import org.bitcoinj.net.AbstractTimeoutHandler;
 import org.bitcoinj.net.MessageWriteTarget;
 import org.bitcoinj.net.StreamConnection;
@@ -121,7 +119,7 @@ public abstract class PeerSocketHandler extends AbstractTimeoutHandler implement
      * Called every time a message is received from the network
      */
     protected abstract void processMessage(Message m) throws Exception;
-    static final String TAG = "PeerSocketHandler.java";
+
     @Override
     public int receiveBytes(ByteBuffer buff) {
         checkArgument(buff.position() == 0 &&
@@ -167,7 +165,6 @@ public abstract class PeerSocketHandler extends AbstractTimeoutHandler implement
                             largeReadBufferPos = buff.remaining();
                             buff.get(largeReadBuffer, 0, largeReadBufferPos);
                         } catch (BufferUnderflowException e1) {
-                            Log.e(TAG, "Error handling msg");
                             // If we went through a whole buffer's worth of bytes without getting a header, give up
                             // In cases where the buff is just really small, we could create a second largeReadBuffer
                             // that we use to deserialize the magic+header, but that is rather complicated when the buff

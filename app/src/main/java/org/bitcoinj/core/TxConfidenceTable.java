@@ -16,8 +16,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import org.bitcoinj.utils.*;
 
 import javax.annotation.*;
@@ -149,31 +147,6 @@ public class TxConfidenceTable {
         lock.unlock();
         if (fresh)
             confidence.queueListeners(TransactionConfidence.Listener.ChangeReason.SEEN_PEERS);
-        return confidence;
-    }
-    static final String TAG = "TxConfidenceTable.java";
-    /**
-     * Called by peers when they see a transaction advertised in an "inv" message. It passes the data on to the relevant
-     * {@link org.bitcoinj.core.TransactionConfidence} object, creating it if needed.
-     *
-     * @return the number of peers that have now announced this hash (including the caller)
-     */
-    public TransactionConfidence seen(Sha256Hash hash, PeerAddress byPeer, boolean isIX) {
-        TransactionConfidence confidence;
-        boolean fresh = false;
-        lock.lock();
-        {
-            cleanTable();
-            confidence = getOrCreate(hash);
-            fresh = confidence.markBroadcastBy(byPeer);
-        }
-        lock.unlock();
-        if (fresh)
-            confidence.queueListeners(TransactionConfidence.Listener.ChangeReason.SEEN_PEERS);
-        if(isIX) {
-            confidence.setDepthInBlocks(5);
-            //confidence.setConfidenceType(TransactionConfidence.ConfidenceType.BUILDING);
-        }
         return confidence;
     }
 

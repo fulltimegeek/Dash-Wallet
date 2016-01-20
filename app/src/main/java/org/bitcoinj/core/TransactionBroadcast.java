@@ -16,8 +16,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import com.google.common.annotations.*;
 import com.google.common.base.*;
 import com.google.common.util.concurrent.*;
@@ -54,12 +52,11 @@ public class TransactionBroadcast {
     
     // Tracks which nodes sent us a reject message about this broadcast, if any. Useful for debugging.
     private Map<Peer, RejectMessage> rejects = Collections.synchronizedMap(new HashMap<Peer, RejectMessage>());
-    static final String TAG = "TransactionBroadcast.java";
+
     TransactionBroadcast(PeerGroup peerGroup, Transaction tx) {
         this.peerGroup = peerGroup;
         this.tx = tx;
-        this.minConnections=5;
-        //this.minConnections = Math.max(1, peerGroup.getMinBroadcastConnections());
+        this.minConnections = Math.max(1, peerGroup.getMinBroadcastConnections());
     }
 
     // Only for mock broadcasts.
@@ -88,8 +85,7 @@ public class TransactionBroadcast {
     }
 
     public void setMinConnections(int minConnections) {
-        Log.i(TAG, "[DISABLED] Setting minConn to "+minConnections);
-        this.minConnections = 5;
+        this.minConnections = minConnections;
     }
 
     private PeerDataEventListener rejectionListener = new AbstractPeerDataEventListener() {

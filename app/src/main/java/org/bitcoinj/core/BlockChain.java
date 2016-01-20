@@ -17,8 +17,6 @@
 
 package org.bitcoinj.core;
 
-import android.util.Log;
-
 import static com.google.common.base.Preconditions.checkArgument;
 
 import org.bitcoinj.store.BlockStore;

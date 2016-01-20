@@ -1,7 +1,5 @@
 package org.bitcoinj.wallet;
 
-import android.util.Log;
-
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
@@ -19,7 +17,6 @@ import java.util.*;
  * "spending" more priority than would be required to get the transaction we are creating confirmed.
  */
 public class DefaultCoinSelector implements CoinSelector {
-    final static String TAG = "DefaultCoinSelector.java";
     @Override
     public CoinSelection select(Coin target, List<TransactionOutput> candidates) {
         ArrayList<TransactionOutput> selected = new ArrayList<TransactionOutput>();
@@ -88,6 +85,6 @@ public class DefaultCoinSelector implements CoinSelector {
                confidence.getSource().equals(TransactionConfidence.Source.SELF) &&
                // In regtest mode we expect to have only one peer, so we won't see transactions propagate.
                // TODO: The value 1 below dates from a time when transactions we broadcast *to* were counted, set to 0
-               (confidence.numBroadcastPeers() > -1 || tx.getParams() == RegTestParams.get());
+               (confidence.numBroadcastPeers() > 1 || tx.getParams() == RegTestParams.get());
     }
 }

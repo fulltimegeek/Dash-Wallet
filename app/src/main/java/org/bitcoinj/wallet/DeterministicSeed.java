@@ -17,8 +17,6 @@
 
 package org.bitcoinj.wallet;
 
-import android.util.Log;
-
 import org.bitcoinj.core.Utils;
 import org.bitcoinj.crypto.*;
 import org.bitcoinj.store.UnreadableWalletException;
@@ -95,7 +93,6 @@ public class DeterministicSeed implements EncryptableItem {
         this(getEntropy(random, bits), checkNotNull(passphrase), creationTimeSeconds);
     }
 
-    final static String TAG = "DeterministicSeed.java";
     /**
      * Constructs a seed from a BIP 39 mnemonic code. See {@link org.bitcoinj.crypto.MnemonicCode} for more
      * details on this scheme.
@@ -104,30 +101,19 @@ public class DeterministicSeed implements EncryptableItem {
      * @param creationTimeSeconds When the seed was originally created, UNIX time.
      */
     public DeterministicSeed(byte[] entropy, String passphrase, long creationTimeSeconds) {
-        Log.i(TAG, "creating Deterministric Seed");
         checkArgument(entropy.length % 4 == 0, "entropy size in bits not divisible by 32");
         checkArgument(entropy.length * 8 >= DEFAULT_SEED_ENTROPY_BITS, "entropy size too small");
         checkNotNull(passphrase);
 
         try {
-            Log.i(TAG, "getting mnemonicCode");
-            if(MnemonicCode.INSTANCE != null) {
-                Log.i(TAG, "INSTANCE is NOT null.");
-                this.mnemonicCode = MnemonicCode.INSTANCE.toMnemonic(entropy);
-            }else{
-                Log.e(TAG, "INSTANCE is null.");
-                this.mnemonicCode = MnemonicCode.INSTANCE.toMnemonic(entropy);
-            }
+            this.mnemonicCode = MnemonicCode.INSTANCE.toMnemonic(entropy);
         } catch (MnemonicException.MnemonicLengthException e) {
             // cannot happen
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
-        Log.i(TAG, "converting MnemonicCode to seed");
         this.seed = MnemonicCode.toSeed(mnemonicCode, passphrase);
         this.encryptedMnemonicCode = null;
         this.creationTimeSeconds = creationTimeSeconds;
-        Log.i(TAG, "deterministic seed created");
     }
 
     private static byte[] getEntropy(SecureRandom random, int bits) {
