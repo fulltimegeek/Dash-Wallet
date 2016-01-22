@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -94,6 +95,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     TextView tvSendMsg;
     CheckBox cbIx;
     EditText etAmountSending;
+    EditText etPin;
+    EditText etPinConfirm;
     RelativeLayout rlPending;
     LinearLayout llMenuButtons;
     Dialog sendDialog;
@@ -270,6 +273,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnRestoreWalletCancel.setOnClickListener(this);
         btnCancelEncrypt = (Button) encryptDialog.findViewById(R.id.btn_cancel_encrypt);
         btnCancelEncrypt.setOnClickListener(this);
+        btnOkEncrypt = (Button) encryptDialog.findViewById(R.id.btn_ok_encrypt);
+        btnOkEncrypt.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -313,6 +318,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         tvAlertSend = (TextView) sendDialog.findViewById(R.id.tv_alert_send);
         tvBlockHeight = (TextView) findViewById(R.id.tv_block_height);
         tvSendMsg = (TextView) sendDialog.findViewById(R.id.tv_send_label);
+        etPin = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin);
+        etPinConfirm = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin_confirm);
     }
 
     public void resetWaiting() {
@@ -567,9 +574,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 break;
             case R.id.btn_encrypt:
                 encryptDialog.show();
+                etPin.requestFocus();
+                encryptDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                 break;
             case R.id.btn_cancel_encrypt:
                 encryptDialog.dismiss();
+                etPin.setText("");
+                etPinConfirm.setText("");
                 break;
             case R.id.btn_restore_wallet:
                 initWalletDialog.dismiss();
