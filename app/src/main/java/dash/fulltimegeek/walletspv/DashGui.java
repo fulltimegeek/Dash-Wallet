@@ -82,6 +82,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_NONE = -1;
     final static int PROGRESS_STARTING = 0;
     final static int PROGRESS_RESCANING =1;
+    final static int PROGRESS_ENCRYPTING = 2;
     final static int PIN_MIN_LENGTH = 6;
     static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
@@ -581,17 +582,34 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 encryptDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                 break;
             case R.id.btn_cancel_encrypt:
-                encryptDialog.dismiss();
-                etPin.setText("");
-                etPinConfirm.setText("");
-                tvAlertEncrypt.setText("");
+                resetEncryptDialog();
                 break;
             case R.id.btn_ok_encrypt:
                 if(etPin.getText().toString().equals(etPinConfirm.getText().toString())){
                     if(etPin.length() >= PIN_MIN_LENGTH){
                         tvAlertEncrypt.setText("");
+                        if(service != null && service.kit !=null && service.kit.wallet() != null){
+                            if(service.kit.wallet().isEncrypted()){
+                                tvAlertEncrypt.setText("Wallet already encrypted");
+                            }else {
+                                final String pin = etPin.getText().toString();
+                                resetEncryptDialog();
+                                currentProgress = PROGRESS_ENCRYPTING;
+                                showProgress(currentProgress);
+                                Thread t = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        service.kit.wallet().encrypt(pin);
+                                        dismissProgress();
+                                        currentProgress = PROGRESS_NONE;
+                                    }
+                                });
+                                t.start();
+
+                            }
+                        }
                     }else{
-                        tvAlertEncrypt.setText("Minimum Pin Length is ["+PIN_MIN_LENGTH+"]");
+                        tvAlertEncrypt.setText("Pin Minimum Length is ["+PIN_MIN_LENGTH+"]");
                     }
                 }else{
                     tvAlertEncrypt.setText("Pin Does Not Match");
@@ -683,6 +701,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         } catch (WriterException e) {
             e.printStackTrace();
         }
+    }
+
+    private void resetEncryptDialog(){
+        encryptDialog.dismiss();
+        etPin.setText("");
+        etPinConfirm.setText("");
+        tvAlertEncrypt.setText("");
     }
 
     private void shareQRCode() {
@@ -836,6 +861,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                     } else if (type == PROGRESS_RESCANING) {
                         final String msg = "Rescanning chain";
                         progress.setMessage(msg + "...");
+                    } else if (type == PROGRESS_ENCRYPTING) {
+                        final String msg = "Encrypting wallet";
+                        progress.setMessage(msg);
                     } else {
                         final String msg = "Please wait";
                         progress.setMessage(msg + "...");
