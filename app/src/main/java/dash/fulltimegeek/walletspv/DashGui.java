@@ -399,13 +399,16 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         }
     }
 
-    final static int MENU_BTN_RESCAN_CHECKPOINT = 1;
-    final static int MENU_BTN_RESCAN_GENESIS = 2;
+
+    final static int MENU_BTN_IMPORT = 1;
+    final static int MENU_BTN_RESCAN_CHECKPOINT = 2;
+    final static int MENU_BTN_RESCAN_GENESIS = 3;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i("MainScreen.java","Creating Options Menu");
-        menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
         menu.add(0, MENU_BTN_RESCAN_GENESIS, MENU_BTN_RESCAN_GENESIS, "Rescan (Genesis)");
+        menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
+        menu.add(0, MENU_BTN_IMPORT,MENU_BTN_IMPORT, "Import Key");
         return true;
     }
     @Override
@@ -417,6 +420,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
             case MENU_BTN_RESCAN_GENESIS:
                 genesisScanConfirm.alert.show();
+                break;
+
+            case MENU_BTN_IMPORT:
+                waitingToImport = true;
+                scanIntegrator.initiateScan();
                 break;
         }
         return super.onOptionsItemSelected(item);
