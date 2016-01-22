@@ -154,7 +154,7 @@
                 android:visibility="visible" />
 
             <Button
-                android:id="@+id/btn_import_key"
+                android:id="@+id/btn_history"
                 android:layout_weight="1"
                 android:layout_marginBottom="5dp"
                 android:layout_width="300dp"
@@ -162,14 +162,14 @@
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/btn_default_glued"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="Import Key"
+                android:text="History"
                 android:textColor="#fff"
                 android:textSize="35sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
             <Button
-                android:id="@+id/btn_rescan_chain"
+                android:id="@+id/btn_encrypt"
                 android:layout_weight="1"
                 android:layout_marginBottom="5dp"
                 android:layout_width="300dp"
@@ -178,6 +178,21 @@
                 android:background="@drawable/btn_default_glued"
                 android:gravity="center_vertical|center_horizontal"
                 android:text="Rescan Chain"
+                android:textColor="#fff"
+                android:textSize="35sp"
+                android:textStyle="bold"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/btn_backup"
+                android:layout_weight="1"
+                android:layout_marginBottom="5dp"
+                android:layout_width="300dp"
+                android:layout_height="55dp"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_default_glued"
+                android:gravity="center_vertical|center_horizontal"
+                android:text="Backup"
                 android:textColor="#fff"
                 android:textSize="35sp"
                 android:textStyle="bold"

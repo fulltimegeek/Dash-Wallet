@@ -210,8 +210,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnSend;
     Button btnReceive;
     Button btnOther;
-    Button btnImport;
-    Button btnRescan;
+    Button btnHistory;
+    Button btnEncrypt;
     Button btnMainMenu;
     Button btnCreateNewWallet;
     Button btnRestoreWallet;
@@ -237,10 +237,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnSend.setOnClickListener(this);
         btnReceive = (Button) findViewById(R.id.btn_receive);
         btnReceive.setOnClickListener(this);
-        btnImport = (Button) findViewById(R.id.btn_import_key);
-        btnImport.setOnClickListener(this);
-        btnRescan = (Button) findViewById(R.id.btn_rescan_chain);
-        btnRescan.setOnClickListener(this);
+        btnHistory = (Button) findViewById(R.id.btn_history);
+        btnHistory.setOnClickListener(this);
+        btnEncrypt = (Button) findViewById(R.id.btn_encrypt);
+        btnEncrypt.setOnClickListener(this);
         btnMainMenu = (Button) findViewById(R.id.btn_main_menu);
         btnMainMenu.setOnClickListener(this);
         Button btn = (Button) sendDialog.findViewById(R.id.btn_cancel_send);
@@ -567,12 +567,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case R.id.btn_other:
                 buildMenuButtons(MENU_OTHER);
                 break;
-            case R.id.btn_import_key:
-                waitingToImport = true;
-                scanIntegrator.initiateScan();
+            case R.id.btn_history:
                 break;
-            case R.id.btn_rescan_chain:
-                rescanFromCheckpoint(true);
+            case R.id.btn_encrypt:
                 break;
             case R.id.img_logo:
                 //buildMenuButtons(MENU_MAIN);
@@ -824,11 +821,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             llMenuButtons.addView(btnReceive);
             llMenuButtons.addView(btnOther);
         } else if (whichMenu == MENU_OTHER) {
-            llMenuButtons.addView(btnImport);
-            //llMenuButtons.addView(btnRescan);
+            llMenuButtons.addView(btnHistory);
+            llMenuButtons.addView(btnEncrypt);
             llMenuButtons.addView(btnMainMenu);
-            btnImport.setVisibility(View.VISIBLE);
-            //btnRescan.setVisibility(View.VISIBLE);
+            btnHistory.setVisibility(View.VISIBLE);
+            btnEncrypt.setVisibility(View.VISIBLE);
             btnMainMenu.setVisibility(View.VISIBLE);
         }
     }
