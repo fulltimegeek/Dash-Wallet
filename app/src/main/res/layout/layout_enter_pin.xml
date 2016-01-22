@@ -1,0 +1,81 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#fff"
+    android:paddingBottom="@dimen/activity_vertical_margin">
+
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:background="@color/theme_default"
+        android:text="Enter Pin"
+        android:textColor="#fff"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:padding="5dp"
+        android:layout_below="@id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+
+            <EditText
+                android:text=""
+                android:textColor="#fff"
+                android:background="#444"
+                android:paddingLeft="5dp"
+                android:layout_marginTop="10dp"
+                android:id="@+id/et_enter_pin"
+                android:textSize="25sp"
+                android:password="true"
+                android:inputType="number"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+
+
+        <TextView
+            android:id="@+id/tv_alert_pin"
+            android:textColor="#f00"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:visibility="visible"
+            android:text=""
+            android:layout_marginTop="5dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/et_enter_pin"
+            android:gravity="center_horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+
+        <LinearLayout
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:layout_below="@id/tv_alert_pin"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/btn_ok_enter_pin"
+                android:text="OK"
+                android:layout_weight=".5"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btn_cancel_enter_pin"
+                android:text="CANCEL"
+                android:layout_weight=".5"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

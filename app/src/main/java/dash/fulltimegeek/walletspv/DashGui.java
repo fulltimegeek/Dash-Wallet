@@ -56,6 +56,8 @@ import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.utils.MonetaryFormat;
+import org.bitcoinj.wallet.CoinSelector;
+import org.bitcoinj.wallet.DefaultCoinSelector;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import java.io.ByteArrayOutputStream;
@@ -100,6 +102,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     EditText etAmountSending;
     EditText etPin;
     EditText etPinConfirm;
+    EditText etEnterPin;
     RelativeLayout rlPending;
     LinearLayout llMenuButtons;
     Dialog sendDialog;
@@ -107,6 +110,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Dialog initWalletDialog;
     Dialog restoreWalletDialog;
     Dialog encryptDialog;
+    Dialog enterPinDialog;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -227,6 +231,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnRestoreWalletCancel;
     Button btnOkEncrypt;
     Button btnCancelEncrypt;
+    Button btnOkEnterPin;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -278,6 +283,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnCancelEncrypt.setOnClickListener(this);
         btnOkEncrypt = (Button) encryptDialog.findViewById(R.id.btn_ok_encrypt);
         btnOkEncrypt.setOnClickListener(this);
+        btnOkEnterPin = (Button) enterPinDialog.findViewById(R.id.btn_ok_enter_pin);
+        btnOkEnterPin.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -304,6 +311,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         encryptDialog.setCancelable(true);
         encryptDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         encryptDialog.setContentView(inflater.inflate(R.layout.layout_encrypt,null));
+        enterPinDialog = new Dialog(activity);
+        enterPinDialog.setCancelable(true);
+        enterPinDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        enterPinDialog.setContentView(inflater.inflate(R.layout.layout_enter_pin,null));
     }
 
     public void setupTextViews() {
@@ -324,6 +335,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         etPin = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin);
         etPinConfirm = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin_confirm);
         tvAlertEncrypt = (TextView) encryptDialog.findViewById(R.id.tv_alert_encrypt);
+        etEnterPin = (EditText) enterPinDialog.findViewById(R.id.et_enter_pin);
     }
 
     public void resetWaiting() {
@@ -577,6 +589,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onClick(View v) {
+        boolean isIX = (cbIx.isChecked());
+        String amount = etAmountSending.getText().toString();
+        String recipient = tvRecipient.toString();
+        Coin minFee = Transaction.DEFAULT_MIN_TX_FEE;
+        CoinSelector coinSelector;
+
         switch (v.getId()) {
             case R.id.btn_restore_wallet_cancel:
                 restoreWalletDialog.dismiss();
@@ -622,6 +640,14 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }else{
                     tvAlertEncrypt.setText("Pin Does Not Match");
                 }
+                break;
+            case R.id.btn_ok_enter_pin:
+                amount = etAmountSending.getText().toString();
+                recipient = tvRecipient.getText().toString();
+                isIX = cbIx.isChecked();
+                String pin = etEnterPin.getText().toString();
+                sendDash(amount,recipient,isIX,pin);
+                enterPinDialog.dismiss();
                 break;
             case R.id.btn_restore_wallet:
                 initWalletDialog.dismiss();
@@ -679,7 +705,30 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         tvRecipient.getText().toString() != "" &&
                         etAmountSending.getText().toString() != "" &&
                         Float.parseFloat(etAmountSending.getText().toString()) > 0) {
-                    sendDash(etAmountSending.getText().toString(), tvRecipient.getText().toString(), cbIx.isChecked());
+                    isIX = (cbIx.isChecked());
+                    amount = etAmountSending.getText().toString();
+                    recipient = tvRecipient.getText().toString();
+                    minFee = Transaction.DEFAULT_MIN_TX_FEE;
+                    if (isIX) {
+                        minFee = Transaction.DEFAULT_MIN_IX_FEE;
+                        coinSelector = new IXCoinSelector();
+                    }else{
+                        coinSelector = new DefaultCoinSelector();
+                    }
+                    if(!Coin.parseCoin(amount).isGreaterThan(isIX ? service.kit.wallet().getBalance().subtract(minFee) : service.kit.wallet().getBalance().subtract(minFee))) {
+                        if (service.kit.wallet().getBalance(coinSelector).subtract(minFee).isPositive()) {
+                            if(service.kit.wallet().isEncrypted()){
+                                enterPinDialog.show();
+                                enterPinDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                            }else{
+                                sendDash(amount,recipient,isIX,null);
+                            }
+                        }else{
+                            sendAlert("IX -- CONF TOO LOW");
+                        }
+                    }else{
+                        sendAlert("INSUFFICIENT FUNDS");
+                    }
                 } else if (tvRecipient.getText().toString().equals("")) {
                     sendAlert("ADD RECIPIENT");
                 } else if (etAmountSending.getText().toString() != "" || Float.parseFloat(etAmountSending.getText().toString()) == 0) {
@@ -795,14 +844,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         t.start();
     }
 
-    public void sendDash(String amount, String recipient, boolean isIX) {
+    public void sendDash(String amount, String recipient, boolean isIX, String pin) {
         String decrypt = "";
         KeyCrypter crypter = null;
         KeyParameter keyParameter = null;
-        if (service.kit.wallet().isEncrypted()) {
+        if (service.kit.wallet().isEncrypted() && pin != null) {
             crypter = service.kit.wallet().getKeyCrypter();
-            decrypt = "test";
-            keyParameter = crypter.deriveKey(decrypt);
+            keyParameter = crypter.deriveKey(pin);
             try {
                 service.kit.wallet().decrypt(keyParameter);
             } catch (KeyCrypterException e) {
@@ -810,23 +858,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             }
         }
         if (!service.kit.wallet().isEncrypted()) {
-            Coin minFee = Transaction.DEFAULT_MIN_TX_FEE;
-            if (isIX) {
-                minFee = Transaction.DEFAULT_MIN_IX_FEE;
-            }
-            if (!Coin.parseCoin(amount).isGreaterThan(isIX ? service.kit.wallet().getBalance().subtract(minFee) : service.kit.wallet().getBalance().subtract(minFee))) {
-                if (isIX) {
-                    if (service.kit.wallet().getBalance(new IXCoinSelector()).subtract(minFee).isPositive()) {
-                        sendCoins(amount, recipient, isIX);
-                    } else {
-                        sendAlert("IX -- CONF TOO LOW");
-                    }
-                } else {
-                    sendCoins(amount, recipient, isIX);
-                }
-            } else {
-                sendAlert("INSUFFICIENT FUNDS");
-            }
+            sendCoins(amount, recipient, isIX);
             if (!decrypt.equals("") && crypter != null && keyParameter != null) {
                 service.kit.wallet().encrypt(crypter, keyParameter);
             }
