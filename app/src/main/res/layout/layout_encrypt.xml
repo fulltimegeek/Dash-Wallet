@@ -10,7 +10,7 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@color/theme_default"
-        android:text="SEND"
+        android:text="Encrypt"
         android:textColor="#fff"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -23,53 +23,70 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-
+        <LinearLayout
+            android:id="@+id/ll_pin"
+            android:layoutDirection="rtl"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:orientation="horizontal"
+            android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_encrypt_pin"
             android:text="Pin:"
-            android:layout_marginTop="10dp"
             android:layout_marginRight="5dp"
+            android:gravity="bottom|right"
+            android:layout_gravity="bottom|right"
             android:textSize="16sp"
             android:textColor="@color/theme_default"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight=".75"
             android:layout_height="wrap_content" />
         <EditText
-            android:text="0.000"
+            android:text=""
             android:textColor="#fff"
             android:background="#444"
             android:paddingLeft="5dp"
             android:id="@+id/et_encrypt_pin"
-            android:layout_alignBottom="@id/tv_encrypt_pin"
-            android:inputType="numberDecimal"
             android:textSize="25sp"
-            android:layout_toRightOf="@id/tv_encrypt_pin"
+            android:password="true"
+            android:inputType="number"
             android:layout_marginRight="10dp"
             android:layout_width="fill_parent"
-            android:layout_height="20dp" />
-
+            android:layout_weight=".25"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/ll_pin_confirm"
+            android:layoutDirection="rtl"
+            android:layout_below="@+id/ll_pin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_encrypt_pin_confirm"
             android:text="Confirm:"
-            android:layout_marginTop="10dp"
+            android:layout_gravity="bottom|right"
+            android:gravity="bottom|right"
             android:layout_marginRight="5dp"
             android:textSize="16sp"
             android:textColor="@color/theme_default"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_weight=".75"
             android:layout_height="wrap_content" />
         <EditText
-            android:text="0.000"
+            android:text=""
             android:textColor="#fff"
             android:background="#444"
             android:paddingLeft="5dp"
+            android:layout_marginTop="10dp"
             android:id="@+id/et_encrypt_pin_confirm"
-            android:layout_alignBottom="@id/tv_encrypt_pin"
-            android:inputType="numberDecimal"
             android:textSize="25sp"
-            android:layout_toRightOf="@id/tv_encrypt_pin_confirm"
+            android:password="true"
+            android:inputType="number"
             android:layout_marginRight="10dp"
             android:layout_width="fill_parent"
-            android:layout_height="20dp" />
-
+            android:layout_weight=".25"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
 
 
         <TextView
@@ -81,7 +98,7 @@
             android:text=""
             android:layout_marginTop="10dp"
             android:layout_alignParentLeft="true"
-            android:layout_below="@id/tv_encrypt_pin_confirm"
+            android:layout_below="@id/ll_pin_confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -89,18 +106,18 @@
         <LinearLayout
             android:layout_marginTop="15dp"
             android:gravity="center"
-            android:layout_below="@id/tv_alert_encrypt"
+            android:layout_below="@id/ll_pin_confirm"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
             <Button
-                android:id="@+id/btn_ok_send"
+                android:id="@+id/btn_ok_encrypt"
                 android:text="OK"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id="@+id/btn_cancel_send"
+                android:id="@+id/btn_cancel_encrypt"
                 android:text="CANCEL"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"

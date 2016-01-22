@@ -100,6 +100,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Dialog receiveDialog;
     Dialog initWalletDialog;
     Dialog restoreWalletDialog;
+    Dialog encryptDialog;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -218,6 +219,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnRestoreWalletFile;
     Button btnRestoreWalletSeed;
     Button btnRestoreWalletCancel;
+    Button btnOkEncrypt;
+    Button btnCancelEncrypt;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -265,6 +268,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnRestoreWalletSeed.setOnClickListener(this);
         btnRestoreWalletCancel = (Button) restoreWalletDialog.findViewById(R.id.btn_restore_wallet_cancel);
         btnRestoreWalletCancel.setOnClickListener(this);
+        btnCancelEncrypt = (Button) encryptDialog.findViewById(R.id.btn_cancel_encrypt);
+        btnCancelEncrypt.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -287,6 +292,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         restoreWalletDialog.setCancelable(true);
         restoreWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         restoreWalletDialog.setContentView(inflater.inflate(R.layout.layout_restore_wallet_dialog,null));
+        encryptDialog = new Dialog(activity);
+        encryptDialog.setCancelable(true);
+        encryptDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        encryptDialog.setContentView(inflater.inflate(R.layout.layout_encrypt,null));
     }
 
     public void setupTextViews() {
@@ -556,6 +565,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                     initWalletDialog.show();
                 }
                 break;
+            case R.id.btn_encrypt:
+                encryptDialog.show();
+                break;
+            case R.id.btn_cancel_encrypt:
+                encryptDialog.dismiss();
+                break;
             case R.id.btn_restore_wallet:
                 initWalletDialog.dismiss();
                 restoreWalletDialog.show();
@@ -568,8 +583,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 buildMenuButtons(MENU_OTHER);
                 break;
             case R.id.btn_history:
-                break;
-            case R.id.btn_encrypt:
                 break;
             case R.id.img_logo:
                 //buildMenuButtons(MENU_MAIN);

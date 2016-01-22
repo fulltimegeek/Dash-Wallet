@@ -177,7 +177,7 @@
                 android:layout_centerHorizontal="true"
                 android:background="@drawable/btn_default_glued"
                 android:gravity="center_vertical|center_horizontal"
-                android:text="Rescan Chain"
+                android:text="Encrypt"
                 android:textColor="#fff"
                 android:textSize="35sp"
                 android:textStyle="bold"
