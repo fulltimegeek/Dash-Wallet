@@ -82,6 +82,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_NONE = -1;
     final static int PROGRESS_STARTING = 0;
     final static int PROGRESS_RESCANING =1;
+    final static int PIN_MIN_LENGTH = 6;
     static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
     IntentIntegrator scanIntegrator;
@@ -93,6 +94,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     TextView tvAlertSend;
     TextView tvBlockHeight;
     TextView tvSendMsg;
+    TextView tvAlertEncrypt;
     CheckBox cbIx;
     EditText etAmountSending;
     EditText etPin;
@@ -320,6 +322,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         tvSendMsg = (TextView) sendDialog.findViewById(R.id.tv_send_label);
         etPin = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin);
         etPinConfirm = (EditText) encryptDialog.findViewById(R.id.et_encrypt_pin_confirm);
+        tvAlertEncrypt = (TextView) encryptDialog.findViewById(R.id.tv_alert_encrypt);
     }
 
     public void resetWaiting() {
@@ -581,6 +584,18 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 encryptDialog.dismiss();
                 etPin.setText("");
                 etPinConfirm.setText("");
+                tvAlertEncrypt.setText("");
+                break;
+            case R.id.btn_ok_encrypt:
+                if(etPin.getText().toString().equals(etPinConfirm.getText().toString())){
+                    if(etPin.length() >= PIN_MIN_LENGTH){
+                        tvAlertEncrypt.setText("");
+                    }else{
+                        tvAlertEncrypt.setText("Minimum Pin Length is ["+PIN_MIN_LENGTH+"]");
+                    }
+                }else{
+                    tvAlertEncrypt.setText("Pin Does Not Match");
+                }
                 break;
             case R.id.btn_restore_wallet:
                 initWalletDialog.dismiss();

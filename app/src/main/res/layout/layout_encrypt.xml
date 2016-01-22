@@ -94,19 +94,20 @@
             android:textColor="#f00"
             android:textStyle="bold"
             android:textSize="15sp"
-            android:visibility="invisible"
+            android:visibility="visible"
             android:text=""
             android:layout_marginTop="10dp"
             android:layout_alignParentLeft="true"
             android:layout_below="@id/ll_pin_confirm"
-            android:layout_width="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
 
         <LinearLayout
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="10dp"
             android:gravity="center"
-            android:layout_below="@id/ll_pin_confirm"
+            android:layout_below="@id/tv_alert_encrypt"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
             <Button
