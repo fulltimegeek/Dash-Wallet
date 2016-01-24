@@ -234,6 +234,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnCancelEncrypt;
     Button btnOkEnterPin;
     Button btnCancelEnterPin;
+    Button btnBackup;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -289,6 +290,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnOkEnterPin.setOnClickListener(this);
         btnCancelEnterPin = (Button) enterPinDialog.findViewById(R.id.btn_cancel_enter_pin);
         btnCancelEnterPin.setOnClickListener(this);
+        btnBackup = (Button) findViewById(R.id.btn_backup);
+        btnBackup.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -632,6 +635,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                                         service.kit.wallet().encrypt(pin);
                                         dismissProgress();
                                         currentProgress = PROGRESS_NONE;
+                                        buildMenuButtons(MENU_OTHER);
                                     }
                                 });
                                 t.start();
@@ -957,11 +961,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             llMenuButtons.addView(btnOther);
         } else if (whichMenu == MENU_OTHER) {
             llMenuButtons.addView(btnHistory);
-            llMenuButtons.addView(btnEncrypt);
+            if(service != null && service.kit !=null && !service.kit.wallet().isEncrypted()) {
+                llMenuButtons.addView(btnEncrypt);
+            }else{
+                llMenuButtons.addView(btnBackup);
+            }
             llMenuButtons.addView(btnMainMenu);
-            btnHistory.setVisibility(View.VISIBLE);
-            btnEncrypt.setVisibility(View.VISIBLE);
-            btnMainMenu.setVisibility(View.VISIBLE);
         }
     }
 
