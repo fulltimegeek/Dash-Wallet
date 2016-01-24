@@ -112,6 +112,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Dialog restoreWalletDialog;
     Dialog encryptDialog;
     Dialog enterPinDialog;
+    Dialog backupDialog;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -235,6 +236,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnOkEnterPin;
     Button btnCancelEnterPin;
     Button btnBackup;
+    Button btnCancelBackup;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -292,6 +294,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnCancelEnterPin.setOnClickListener(this);
         btnBackup = (Button) findViewById(R.id.btn_backup);
         btnBackup.setOnClickListener(this);
+        btnCancelBackup = (Button) backupDialog.findViewById(R.id.btn_cancel_backup);
+        btnCancelBackup.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -322,6 +326,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         enterPinDialog.setCancelable(true);
         enterPinDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         enterPinDialog.setContentView(inflater.inflate(R.layout.layout_enter_pin,null));
+        backupDialog = new Dialog(activity);
+        backupDialog.setCancelable(true);
+        backupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        backupDialog.setContentView(inflater.inflate(R.layout.layout_backup,null));
     }
 
     public void setupTextViews() {
@@ -768,6 +776,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case R.id.btn_cancel_enter_pin:
                 etEnterPin.setText("");
                 enterPinDialog.dismiss();
+                break;
+            case R.id.btn_cancel_backup:
+                backupDialog.dismiss();
+                break;
+            case R.id.btn_backup:
+                backupDialog.show();
                 break;
             default:
                 break;
