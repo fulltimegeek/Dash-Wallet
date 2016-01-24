@@ -85,6 +85,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_STARTING = 0;
     final static int PROGRESS_RESCANING =1;
     final static int PROGRESS_ENCRYPTING = 2;
+    final static int PROGRESS_UNLOCKING = 3;
     final static int PIN_MIN_LENGTH = 6;
     static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
@@ -232,6 +233,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnOkEncrypt;
     Button btnCancelEncrypt;
     Button btnOkEnterPin;
+    Button btnCancelEnterPin;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -285,6 +287,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnOkEncrypt.setOnClickListener(this);
         btnOkEnterPin = (Button) enterPinDialog.findViewById(R.id.btn_ok_enter_pin);
         btnOkEnterPin.setOnClickListener(this);
+        btnCancelEnterPin = (Button) enterPinDialog.findViewById(R.id.btn_cancel_enter_pin);
+        btnCancelEnterPin.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -589,9 +593,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onClick(View v) {
-        boolean isIX = (cbIx.isChecked());
-        String amount = etAmountSending.getText().toString();
-        String recipient = tvRecipient.toString();
+        final boolean isIX = (cbIx.isChecked());
+        final String amount = etAmountSending.getText().toString();
+        final String recipient = tvRecipient.getText().toString();
         Coin minFee = Transaction.DEFAULT_MIN_TX_FEE;
         CoinSelector coinSelector;
 
@@ -642,11 +646,29 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_ok_enter_pin:
-                amount = etAmountSending.getText().toString();
-                recipient = tvRecipient.getText().toString();
-                isIX = cbIx.isChecked();
-                String pin = etEnterPin.getText().toString();
-                sendDash(amount,recipient,isIX,pin);
+                final String pin = etEnterPin.getText().toString();
+                if(service.kit.wallet().isEncrypted() && pin != null && !pin.equals("")) {
+                    currentProgress = PROGRESS_UNLOCKING;
+                    showProgress(PROGRESS_UNLOCKING);
+                    Thread t = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            KeyCrypter crypter = service.kit.wallet().getKeyCrypter();
+                            KeyParameter keyParameter = crypter.deriveKey(pin);
+                            if(service.kit.wallet().checkAESKey(keyParameter)) {
+                                sendDash(amount, recipient, isIX, keyParameter);
+                            }else{
+                                sendAlert("Incorrect Pin");
+                            }
+                            currentProgress = PROGRESS_NONE;
+                            progress.dismiss();
+                        }
+                    });
+                    t.start();
+                }else{
+                    sendDash(amount, recipient, isIX, null);
+                }
+                etEnterPin.setText("");
                 enterPinDialog.dismiss();
                 break;
             case R.id.btn_restore_wallet:
@@ -705,9 +727,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         tvRecipient.getText().toString() != "" &&
                         etAmountSending.getText().toString() != "" &&
                         Float.parseFloat(etAmountSending.getText().toString()) > 0) {
-                    isIX = (cbIx.isChecked());
-                    amount = etAmountSending.getText().toString();
-                    recipient = tvRecipient.getText().toString();
+                    //isIX = (cbIx.isChecked());
+                    //amount = etAmountSending.getText().toString();
+                    //recipient = tvRecipient.getText().toString();
                     minFee = Transaction.DEFAULT_MIN_TX_FEE;
                     if (isIX) {
                         minFee = Transaction.DEFAULT_MIN_IX_FEE;
@@ -738,6 +760,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case R.id.btn_cancel_send:
                 sendDialog.dismiss();
                 resetSendDialog();
+                break;
+            case R.id.btn_cancel_enter_pin:
+                etEnterPin.setText("");
+                enterPinDialog.dismiss();
                 break;
             default:
                 break;
@@ -844,13 +870,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         t.start();
     }
 
-    public void sendDash(String amount, String recipient, boolean isIX, String pin) {
-        String decrypt = "";
+    public void sendDash(String amount, String recipient, boolean isIX, KeyParameter keyParameter) {
         KeyCrypter crypter = null;
-        KeyParameter keyParameter = null;
-        if (service.kit.wallet().isEncrypted() && pin != null) {
+        //KeyParameter keyParameter = null;
+        if (service.kit.wallet().isEncrypted() && keyParameter != null) {
             crypter = service.kit.wallet().getKeyCrypter();
-            keyParameter = crypter.deriveKey(pin);
+            //keyParameter = crypter.deriveKey(pin);
             try {
                 service.kit.wallet().decrypt(keyParameter);
             } catch (KeyCrypterException e) {
@@ -859,7 +884,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         }
         if (!service.kit.wallet().isEncrypted()) {
             sendCoins(amount, recipient, isIX);
-            if (!decrypt.equals("") && crypter != null && keyParameter != null) {
+            if (crypter != null && keyParameter != null) {
                 service.kit.wallet().encrypt(crypter, keyParameter);
             }
         }
@@ -904,7 +929,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                     } else if (type == PROGRESS_ENCRYPTING) {
                         final String msg = "Encrypting wallet";
                         progress.setMessage(msg);
-                    } else {
+                    } else if (type == PROGRESS_UNLOCKING){
+                        final String msg = "Unlocking wallet";
+                        progress.setMessage(msg);
+                    }else {
                         final String msg = "Please wait";
                         progress.setMessage(msg + "...");
                     }
