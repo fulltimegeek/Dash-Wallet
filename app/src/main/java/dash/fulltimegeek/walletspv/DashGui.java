@@ -90,6 +90,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_UNLOCKING = 3;
     final static int PIN_MIN_LENGTH = 6;
     final static int MAX_WORD_LIST = 12;
+    final static String WALLET_BACKUP_DIR = "/sdcard/dash/backups/";
     static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
     IntentIntegrator scanIntegrator;
@@ -250,6 +251,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnOkSeedBox;
     Button btnOkEnterWord;
     Button btnCancelEnterWord;
+    Button btnToFile;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -317,6 +319,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnOkEnterWord.setOnClickListener(this);
         btnCancelEnterWord = (Button) enterWordDialog.findViewById(R.id.btn_cancel_enter_word);
         btnCancelEnterWord.setOnClickListener(this);
+        btnToFile = (Button) backupDialog.findViewById(R.id.btn_to_file);
+        btnToFile.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -894,6 +898,20 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 break;
             case R.id.btn_backup:
                 backupDialog.show();
+                break;
+            case R.id.btn_to_file:
+                File saveDir = new File(WALLET_BACKUP_DIR);
+                if(saveDir.mkdirs() || saveDir.exists()){
+                    File save = new File(saveDir.getPath()+"/"+System.currentTimeMillis()+".wallet");
+                    try {
+                        showToast("Wallet Saved: "+save.getAbsolutePath());
+                        service.kit.wallet().saveToFile(save);
+                        backupDialog.dismiss();
+                    } catch (IOException e) {
+                        Log.i(TAG,"Failed to save wallet to:"+save.getAbsolutePath());
+                        e.printStackTrace();
+                    }
+                }
                 break;
             default:
                 break;
