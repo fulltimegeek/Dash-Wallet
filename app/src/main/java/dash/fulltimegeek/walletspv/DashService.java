@@ -10,6 +10,7 @@ import org.bitcoinj.core.StoredBlock;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.listeners.NewBestBlockListener;
 import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.wallet.DeterministicSeed;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,6 +34,7 @@ public class DashService extends Service implements NewBestBlockListener{
     boolean restoringGenesis = false;
     String walletPrefix = null;
     private boolean hasStarted = false;
+    DeterministicSeed recoverySeed = null;
 
     @Override
     public void onCreate(){
@@ -76,6 +78,8 @@ public class DashService extends Service implements NewBestBlockListener{
                 }
             }
         };
+        if(recoverySeed != null)
+            kit.setRecoverySeed(recoverySeed);
         startSyncing();
     }
 
@@ -185,4 +189,8 @@ public class DashService extends Service implements NewBestBlockListener{
     }
 
     public boolean hasStarted(){return hasStarted;}
+
+    public void setRecoverySeed(DeterministicSeed seed){
+        this.recoverySeed = seed;
+    }
 }

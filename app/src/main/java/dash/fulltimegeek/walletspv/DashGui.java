@@ -54,10 +54,12 @@ import org.bitcoinj.crypto.KeyCrypter;
 import org.bitcoinj.crypto.KeyCrypterException;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.core.listeners.*;
+import org.bitcoinj.crypto.MnemonicException;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.utils.MonetaryFormat;
 import org.bitcoinj.wallet.CoinSelector;
 import org.bitcoinj.wallet.DefaultCoinSelector;
+import org.bitcoinj.wallet.DeterministicSeed;
 import org.spongycastle.crypto.params.KeyParameter;
 
 import java.io.ByteArrayOutputStream;
@@ -87,6 +89,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_ENCRYPTING = 2;
     final static int PROGRESS_UNLOCKING = 3;
     final static int PIN_MIN_LENGTH = 6;
+    final static int MAX_WORD_LIST = 12;
     static int currentProgress = PROGRESS_NONE;
     DialogConfirmPreparer genesisScanConfirm;
     IntentIntegrator scanIntegrator;
@@ -100,7 +103,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     TextView tvSendMsg;
     TextView tvAlertEncrypt;
     TextView tvSeedBox;
+    TextView tvTitleEnterWord;
     CheckBox cbIx;
+    EditText etEnterWord;
     EditText etAmountSending;
     EditText etPin;
     EditText etPinConfirm;
@@ -115,6 +120,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Dialog enterPinDialog;
     Dialog backupDialog;
     Dialog seedBoxDialog;
+    Dialog enterWordDialog;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -122,6 +128,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     static boolean isBound =  false;
     Button scanSend;
     String walletPrefix = null;
+    ArrayList<String> recoveryWords = new ArrayList<String>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -241,6 +248,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Button btnCancelBackup;
     Button btnShowSeed;
     Button btnOkSeedBox;
+    Button btnOkEnterWord;
+    Button btnCancelEnterWord;
 
     public void setupConfirmers(){
         genesisScanConfirm = new DialogConfirmPreparer(activity,new DialogInterface.OnClickListener() {
@@ -304,6 +313,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         btnShowSeed.setOnClickListener(this);
         btnOkSeedBox = (Button) seedBoxDialog.findViewById(R.id.btn_ok_seed_box);
         btnOkSeedBox.setOnClickListener(this);
+        btnOkEnterWord = (Button) enterWordDialog.findViewById(R.id.btn_ok_enter_word);
+        btnOkEnterWord.setOnClickListener(this);
+        btnCancelEnterWord = (Button) enterWordDialog.findViewById(R.id.btn_cancel_enter_word);
+        btnCancelEnterWord.setOnClickListener(this);
     }
 
     public void setupDialogs() {
@@ -323,7 +336,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         initWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         initWalletDialog.setContentView(inflater.inflate(R.layout.layout_init_wallet,null));
         restoreWalletDialog = new Dialog(activity);
-        restoreWalletDialog.setCancelable(true);
+        restoreWalletDialog.setCancelable(false);
         restoreWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         restoreWalletDialog.setContentView(inflater.inflate(R.layout.layout_restore_wallet_dialog,null));
         encryptDialog = new Dialog(activity);
@@ -342,6 +355,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         seedBoxDialog.setCancelable(true);
         seedBoxDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         seedBoxDialog.setContentView(inflater.inflate(R.layout.layout_show_seed,null));
+        enterWordDialog = new Dialog(activity);
+        enterWordDialog.setCancelable(false);
+        enterWordDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        enterWordDialog.setContentView(inflater.inflate(R.layout.layout_enter_word,null));
     }
 
     public void setupTextViews() {
@@ -364,6 +381,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         tvAlertEncrypt = (TextView) encryptDialog.findViewById(R.id.tv_alert_encrypt);
         etEnterPin = (EditText) enterPinDialog.findViewById(R.id.et_enter_pin);
         tvSeedBox = (TextView) seedBoxDialog.findViewById(R.id.tv_seed_box);
+        tvTitleEnterWord = (TextView) enterWordDialog.findViewById(R.id.tv_enter_word_title);
+        etEnterWord = (EditText) enterWordDialog.findViewById(R.id.et_enter_word);
     }
 
     public void resetWaiting() {
@@ -762,7 +781,32 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case R.id.btn_other:
                 buildMenuButtons(MENU_OTHER);
                 break;
-            case R.id.btn_history:
+            case R.id.btn_restore_wallet_seed:
+                restoreWalletDialog.dismiss();
+                resetEnterWord();
+                enterWordDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+                enterWordDialog.show();
+                break;
+            case R.id.btn_ok_enter_word:
+                if(addRecoveryWord()){
+                    enterWordDialog.dismiss();
+                    try {
+                        MnemonicCode.INSTANCE.check(recoveryWords);
+                        Log.i(TAG,"Recovery seed:"+recoveryWords.toString());
+                        byte[] seed = MnemonicCode.toSeed(recoveryWords,"");
+                        DeterministicSeed dseed = new DeterministicSeed(recoveryWords, seed, "", 1);
+                        service.setRecoverySeed(dseed);
+                        startDashService();
+                    } catch (MnemonicException e) {
+                        restoreWalletDialog.show();
+                        e.printStackTrace();
+                    }
+                }
+                break;
+            case R.id.btn_cancel_enter_word:
+                resetEnterWord();
+                enterWordDialog.dismiss();
+                restoreWalletDialog.show();
                 break;
             case R.id.img_logo:
                 //buildMenuButtons(MENU_MAIN);
@@ -1125,5 +1169,37 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void updateGUI(){
         updateBalance();
         updateBlockHeight(null);
+    }
+
+    private void resetEnterWord(){
+        recoveryWords.clear();
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                etEnterWord.setText("");
+                tvTitleEnterWord.setText("Word 1 of "+MAX_WORD_LIST);
+            }
+        });
+    }
+
+    private boolean addRecoveryWord(){
+        boolean full = false;
+        if(!etEnterWord.getText().toString().equals("")){
+            if(recoveryWords.size() < MAX_WORD_LIST){
+                recoveryWords.add(etEnterWord.getText().toString().toLowerCase().replaceAll("\\s",""));
+            }
+            if(recoveryWords.size() == MAX_WORD_LIST){
+                full=true;
+            }else{
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        tvTitleEnterWord.setText("Word "+(recoveryWords.size()+1)+" of "+MAX_WORD_LIST);
+                        etEnterWord.setText("");
+                    }
+                });
+            }
+        }
+        return full;
     }
 }

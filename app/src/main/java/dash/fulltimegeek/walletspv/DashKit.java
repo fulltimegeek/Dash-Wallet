@@ -17,6 +17,7 @@ import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.net.discovery.DnsDiscovery;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.store.SPVBlockStore;
+import org.bitcoinj.wallet.DeterministicSeed;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class DashKit extends WalletAppKit {
     final static String defaultWalletAndChainPrefix = "checkpoint";
     final static String defaultWalletExt = ".wallet";
     final static String defaultChainExt = ".spvchain";
+    private DeterministicSeed recoverySeed = null;
     public DashKit(NetworkParameters params, File directory, String defaultPrefix, String walletPrefix) {
         super(params, directory, defaultPrefix);
         this.walletPrefix = walletPrefix;
@@ -42,6 +44,9 @@ public class DashKit extends WalletAppKit {
         // Runs in a separate thread.
         Log.i(TAG,"DASHKIT STARTING");
         Context.propagate(context);
+        if(recoverySeed != null){
+            this.restoreFromSeed = recoverySeed;
+        }
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
                 Log.e(TAG, "Could not create directory " + directory.getAbsolutePath());
@@ -155,4 +160,8 @@ public class DashKit extends WalletAppKit {
     }
 
     protected void onShutdownCompleted(){}
+
+    public void setRecoverySeed(DeterministicSeed seed){
+        this.recoverySeed = seed;
+    }
 }
