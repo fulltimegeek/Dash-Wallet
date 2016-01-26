@@ -33,6 +33,7 @@ public class DashKit extends WalletAppKit {
     final static String defaultWalletExt = ".wallet";
     final static String defaultChainExt = ".spvchain";
     private DeterministicSeed recoverySeed = null;
+    boolean replayWallet = false;
     public DashKit(NetworkParameters params, File directory, String defaultPrefix, String walletPrefix) {
         super(params, directory, defaultPrefix);
         this.walletPrefix = walletPrefix;
@@ -43,6 +44,8 @@ public class DashKit extends WalletAppKit {
     protected void startUp() throws Exception {
         // Runs in a separate thread.
         Log.i(TAG,"DASHKIT STARTING");
+        walletPrefix = DashGui.preferences.getString(DashGui.PREF_KEY_WALLET_PREFIX,null);
+        Log.i(TAG,"Found custom wallet prefix??"+walletPrefix);
         Context.propagate(context);
         if(recoverySeed != null){
             this.restoreFromSeed = recoverySeed;
@@ -59,7 +62,9 @@ public class DashKit extends WalletAppKit {
             boolean chainFileExists = chainFile.exists();
             walletPrefix = walletPrefix==null?defaultWalletAndChainPrefix:walletPrefix;
             vWalletFile = new File(directory, walletPrefix + defaultWalletExt);
-            boolean shouldReplayWallet = (vWalletFile.exists() && !chainFileExists) || restoreFromSeed != null;
+            Log.i(TAG,"Using wallet file:"+vWalletFile.getAbsolutePath());
+            boolean shouldReplayWallet = (vWalletFile.exists() && !chainFileExists) || restoreFromSeed != null || replayWallet;
+            replayWallet = false;
             vWallet = createOrLoadWallet(shouldReplayWallet);
             // Initiate Bitcoin network objects (block store, blockchain and peer group)
             vStore = provideBlockStore(chainFile);
@@ -156,7 +161,12 @@ public class DashKit extends WalletAppKit {
     }
 
     public void startup() throws Exception{
-        super.startUp();
+        startUp();
+    }
+
+    public void startup(boolean replay) throws Exception{
+        replayWallet = true;
+        startUp();
     }
 
     protected void onShutdownCompleted(){}

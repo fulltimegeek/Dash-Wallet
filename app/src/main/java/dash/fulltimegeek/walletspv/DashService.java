@@ -66,12 +66,13 @@ public class DashService extends Service implements NewBestBlockListener{
                 // This is called in a background thread after startAndWait is called, as setting up various objects
                 // can do disk and network IO that may cause UI jank/stuttering in wallet apps if it were to be done
                 // on the main thread.
+                Log.i(TAG,"DashGui -- onSetupCompleted()");
                 setupCompleted = true;
                 vChain.addNewBestBlockListener(service);
                 if(gui!=null) {
                     if(DashGui.currentProgress == DashGui.PROGRESS_STARTING) {
-                        DashGui.currentProgress = DashGui.PROGRESS_NONE;
-                        gui.dismissProgress();
+                        Log.i(TAG,"DashGui -- onSetupCompleted() dimissing dialog");
+                        gui.showProgress(DashGui.PROGRESS_NONE);
                     }
                     setListeners(gui);
                     gui.updateGUI();
@@ -123,7 +124,7 @@ public class DashService extends Service implements NewBestBlockListener{
             kit.startAsync();
         } else {
             try {
-                kit.startup();
+                kit.startup(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -18,6 +18,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name="br.com.thinkti.android.filechooser.FileChooser">
+        </activity>
+
         <service
             android:name=".DashService"
             android:icon="@drawable/dash_icon"
