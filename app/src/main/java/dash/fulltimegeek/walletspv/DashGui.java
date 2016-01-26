@@ -1145,11 +1145,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }*/
 
     public void showProgress(final int type){
+        DashGui.currentProgress = type;
         if(type != PROGRESS_NONE) {
             if(progress != null)
                 progress.dismiss();
             Log.i(TAG,"showProgress() type:"+type);
-            DashGui.currentProgress = type;
             final String title = "Please Wait";
             activity.runOnUiThread(new Runnable() {
                 @Override
