@@ -10,7 +10,8 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@color/theme_default"
-        android:text="SEND"
+        android:text="@string/send"
+        android:textAllCaps="true"
         android:textColor="#fff"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -26,7 +27,7 @@
         <Button
             android:id="@+id/btn_scan_send"
             android:visibility="visible"
-            android:text="SCAN QR"
+            android:text="@string/scan_qr"
             android:textColor="#fff"
             android:layout_marginBottom="10dp"
             android:paddingLeft="20dp"
@@ -41,7 +42,7 @@
             android:layout_height="wrap_content" />
 
         <TextView
-            android:text="Recipient:"
+            android:text="@string/recipient"
             android:gravity="center"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
@@ -66,7 +67,7 @@
 
         <TextView
             android:id="@+id/tv_amount_label"
-            android:text="Amount:"
+            android:text="@string/amount"
             android:layout_marginTop="10dp"
             android:layout_marginRight="5dp"
             android:textSize="16sp"
@@ -119,7 +120,7 @@
             android:layout_height="wrap_content" />
         <CheckBox
             android:id="@+id/cb_ix"
-            android:text="IX"
+            android:text="@string/ix"
             android:textStyle="bold"
             android:textColor="#444"
             android:paddingLeft="30dp"
@@ -134,7 +135,7 @@
             android:textColor="#f00"
             android:textSize="15sp"
             android:visibility="visible"
-            android:text="(0.01 fee)"
+            android:text="@string/fee"
             android:layout_marginTop="10dp"
             android:layout_toLeftOf="@+id/cb_ix"
             android:layout_below="@id/tv_send_label"
@@ -148,14 +149,16 @@
             android:layout_height="wrap_content">
         <Button
             android:id="@+id/btn_ok_send"
-            android:text="OK"
+            android:text="@string/ok"
+            android:textAllCaps="true"
             android:layout_weight=".5"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
         <Button
             android:id="@+id/btn_cancel_send"
-            android:text="CANCEL"
+            android:text="@string/cancel"
+            android:textAllCaps="true"
             android:layout_weight=".5"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
