@@ -10,7 +10,7 @@
         android:textSize="28sp"
         android:gravity="center"
         android:background="@color/theme_default"
-        android:text="Seed"
+        android:text="@string/seed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <LinearLayout
@@ -32,7 +32,8 @@
 
         <Button
             android:id="@+id/btn_ok_seed_box"
-            android:text="OK"
+            android:text="@string/ok"
+            android:textAllCaps="true"
             android:layout_marginTop="10dp"
             android:textSize="25sp"
             android:textStyle="bold"
