@@ -10,7 +10,7 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@color/theme_default"
-        android:text="Word 1 of 12"
+        android:text=""
         android:textColor="#fff"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -47,14 +47,16 @@
             android:layout_height="wrap_content">
             <Button
                 android:id="@+id/btn_ok_enter_word"
-                android:text="OK"
+                android:text="@string/ok"
+                android:textAllCaps="true"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/btn_cancel_enter_word"
-                android:text="CANCEL"
+                android:text="@string/cancel"
+                android:textAllCaps="true"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
