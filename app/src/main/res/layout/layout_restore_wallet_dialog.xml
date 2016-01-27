@@ -11,7 +11,7 @@
         android:paddingRight="40dp"
         android:paddingLeft="40dp"
         android:background="@color/theme_default"
-        android:text="Restore Wallet"
+        android:text="@string/restore_wallet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
     <LinearLayout
@@ -21,7 +21,7 @@
         android:layout_height="match_parent">
         <Button
             android:id="@+id/btn_restore_wallet_seed"
-            android:text="From Seed"
+            android:text="@string/from_seed"
             android:textSize="25sp"
             android:textStyle="bold"
             android:layout_width="match_parent"
@@ -30,7 +30,7 @@
         <Button
             android:id="@+id/btn_restore_wallet_file"
             android:layout_marginTop="10dp"
-            android:text="From File"
+            android:text="@string/from_file"
             android:textSize="25sp"
             android:textStyle="bold"
             android:layout_width="match_parent"
@@ -39,7 +39,7 @@
 
         <Button
             android:id="@+id/btn_restore_wallet_cancel"
-            android:text="Cancel"
+            android:text="@string/cancel"
             android:layout_marginTop="10dp"
             android:textSize="25sp"
             android:textStyle="bold"
