@@ -10,7 +10,7 @@
         android:textAlignment="center"
         android:gravity="center"
         android:background="@color/theme_default"
-        android:text="Encrypt"
+        android:text="@string/encrypt"
         android:textColor="#fff"
         android:textSize="20sp"
         android:textStyle="bold"
@@ -32,7 +32,7 @@
             android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_encrypt_pin"
-            android:text="Pin:"
+            android:text="@string/pin"
             android:layout_marginRight="5dp"
             android:gravity="bottom|right"
             android:layout_gravity="bottom|right"
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content">
         <TextView
             android:id="@+id/tv_encrypt_pin_confirm"
-            android:text="Confirm:"
+            android:text="@string/confirm"
             android:layout_gravity="bottom|right"
             android:gravity="bottom|right"
             android:layout_marginRight="5dp"
@@ -112,14 +112,16 @@
             android:layout_height="wrap_content">
             <Button
                 android:id="@+id/btn_ok_encrypt"
-                android:text="OK"
+                android:text="@string/ok"
+                android:textAllCaps="true"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
             <Button
                 android:id="@+id/btn_cancel_encrypt"
-                android:text="CANCEL"
+                android:text="@string/cancel"
+                android:textAllCaps="true"
                 android:layout_weight=".5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
