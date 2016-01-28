@@ -1092,13 +1092,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Looper.prepare();
-                Toast.makeText(activity, string, Toast.LENGTH_LONG).show();
+
             }
         });
         t.start();
