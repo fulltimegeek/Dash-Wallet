@@ -111,6 +111,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     TextView tvAlertEncrypt;
     TextView tvSeedBox;
     TextView tvTitleEnterWord;
+    TextView tvPopUp;
     CheckBox cbIx;
     EditText etEnterWord;
     EditText etAmountSending;
@@ -118,6 +119,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     EditText etPinConfirm;
     EditText etEnterPin;
     RelativeLayout rlPending;
+    RelativeLayout rlMain;
     LinearLayout llMenuButtons;
     Dialog sendDialog;
     Dialog receiveDialog;
@@ -379,6 +381,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     public void setupTextViews() {
         rlPending = (RelativeLayout) findViewById(R.id.rl_pending);
+        rlMain = (RelativeLayout) findViewById(R.id.rl_main);
         llMenuButtons = (LinearLayout) findViewById(R.id.ll_menu_buttons);
         tvBalance = (TextView) findViewById(R.id.tv_balance);
         tvPending = (TextView) findViewById(R.id.tv_pending);
@@ -399,6 +402,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         tvSeedBox = (TextView) seedBoxDialog.findViewById(R.id.tv_seed_box);
         tvTitleEnterWord = (TextView) enterWordDialog.findViewById(R.id.tv_enter_word_title);
         etEnterWord = (EditText) enterWordDialog.findViewById(R.id.et_enter_word);
+        tvPopUp = (TextView) findViewById(R.id.tv_pop_up);
     }
 
     public void resetWaiting() {
@@ -1088,11 +1092,32 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     public void showToast(final String string) {
-        Log.i(TAG,"Showing toast:"+string);
+        Log.i(TAG, "Showing toast:" + string);
+
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                rlMain.removeView(tvPopUp);
+                tvPopUp.setText(string);
+                rlMain.addView(tvPopUp);
+                tvPopUp.setVisibility(View.VISIBLE);
+
+            }
+        });
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
-
+                try {
+                    Thread.sleep(4000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        rlMain.removeView(tvPopUp);
+                    }
+                });
             }
         });
         t.start();
