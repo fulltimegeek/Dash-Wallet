@@ -635,6 +635,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             } else {
                 showToast("Success: Key Already In Wallet");
             }
+        }else if(service.kit.wallet().isEncrypted()){
+            showToast("Wallet is encrypted \n Unable to import key");
         }
     }
 
@@ -880,7 +882,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                                 enterPinDialog.show();
                                 enterPinDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                             }else{
-                                sendDash(amount,recipient,isIX,null);
+                                sendDash(amount,recipient,isIX);
                             }
                         }else{
                             sendAlert("IX -- CONF TOO LOW");
@@ -933,30 +935,31 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     public void onWalletUnlockFail(){
+        showProgress(PROGRESS_NONE);
         if(btnOkEnterPin.getTag().toString().equals("send")){
             sendAlert("Incorrect Pin");
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    showProgress(PROGRESS_NONE);
                     sendDialog.show();
                 }
             });
         }else if(btnOkEnterPin.getTag().toString().equals("seed")){
-            showToast("Failed to unlock wallet");
-            showProgress(PROGRESS_NONE);
-            backupDialog.show();
+
+        }else if(btnOkEnterPin.getTag().toString().equals("import")){
+
         }
+        showToast("Failed to unlock wallet");
     }
 
     public void onWalletUnlockSuccess(KeyCrypter crypter, KeyParameter key){
+        showProgress(PROGRESS_NONE);
         if(btnOkEnterPin.getTag().toString().equals("send")){
             final boolean isIX = (cbIx.isChecked());
             final String amount = etAmountSending.getText().toString();
             final String recipient = tvRecipient.getText().toString();
-            showProgress(PROGRESS_NONE);
-            sendDash(amount, recipient, isIX, key);
-        }if(btnOkEnterPin.getTag().toString().equals("seed")){
+            sendDash(amount, recipient, isIX);
+        }else if(btnOkEnterPin.getTag().toString().equals("seed")){
             Log.i(TAG,"SHOWING SEED");
             service.kit.wallet().decrypt(key);
             String tmpMnemonic = "";
@@ -964,8 +967,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 tmpMnemonic = tmpMnemonic.equals("")?word:tmpMnemonic+" "+word;
             }
             final String mnemonic = tmpMnemonic;
-            showProgress(PROGRESS_NONE);
-            service.kit.wallet().encrypt(crypter, key);
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -973,17 +974,25 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                     seedBoxDialog.show();
                 }
             });
+        }else if(btnOkEnterPin.getTag().toString().equals("import")){
+            if(tmpKey != null) {
+                importKey(tmpKey);
+            }
+            tmpKey = null;
         }
+        service.kit.wallet().encrypt(crypter, key);
     }
 
     public void unlockWallet(final String pin){
         if(currentProgress != PROGRESS_UNLOCKING){
+            showProgress(PROGRESS_UNLOCKING);
             Thread t = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     KeyCrypter crypter = service.kit.wallet().getKeyCrypter();
                     KeyParameter keyParameter = crypter.deriveKey(pin);
                     if (service.kit.wallet().checkAESKey(keyParameter)) {
+                        service.kit.wallet().decrypt(keyParameter);
                         onWalletUnlockSuccess(crypter, keyParameter);
                     } else {
                         onWalletUnlockFail();
@@ -997,7 +1006,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void detectPin(){
         final String pin = etEnterPin.getText().toString();
         if(service.kit.wallet().isEncrypted() && pin != null && !pin.equals("")) {
-            showProgress(PROGRESS_UNLOCKING);
             unlockWallet(pin);
         }
 
@@ -1107,15 +1115,15 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     public void showToast(final String string) {
         Log.i(TAG, "Showing toast:" + string);
-
         activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                rlMain.removeView(tvPopUp);
-                tvPopUp.setText(string);
-                rlMain.addView(tvPopUp);
-                tvPopUp.setVisibility(View.VISIBLE);
-
+                if(rlMain != null && tvPopUp != null) {
+                    rlMain.removeView(tvPopUp);
+                    tvPopUp.setText(string);
+                    rlMain.addView(tvPopUp);
+                    tvPopUp.setVisibility(View.VISIBLE);
+                }
             }
         });
         Thread t = new Thread(new Runnable() {
@@ -1129,7 +1137,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        rlMain.removeView(tvPopUp);
+                        if(rlMain != null && tvPopUp != null) {
+                            rlMain.removeView(tvPopUp);
+                        }
                     }
                 });
             }
@@ -1137,23 +1147,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         t.start();
     }
 
-    public void sendDash(String amount, String recipient, boolean isIX, KeyParameter keyParameter) {
-        KeyCrypter crypter = null;
-        //KeyParameter keyParameter = null;
-        if (service.kit.wallet().isEncrypted() && keyParameter != null) {
-            crypter = service.kit.wallet().getKeyCrypter();
-            //keyParameter = crypter.deriveKey(pin);
-            try {
-                service.kit.wallet().decrypt(keyParameter);
-            } catch (KeyCrypterException e) {
-                e.printStackTrace();
-            }
-        }
+    public void sendDash(String amount, String recipient, boolean isIX) {
         if (!service.kit.wallet().isEncrypted()) {
             sendCoins(amount, recipient, isIX);
-            if (crypter != null && keyParameter != null) {
-                service.kit.wallet().encrypt(crypter, keyParameter);
-            }
         }
     }
 
