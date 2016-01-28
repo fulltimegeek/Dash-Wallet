@@ -484,12 +484,14 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int MENU_BTN_IMPORT = 1;
     final static int MENU_BTN_RESCAN_CHECKPOINT = 2;
     final static int MENU_BTN_RESCAN_GENESIS = 3;
+    final static int MENU_BTN_RESTORE = 4;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i("MainScreen.java","Creating Options Menu");
         menu.add(0, MENU_BTN_RESCAN_GENESIS, MENU_BTN_RESCAN_GENESIS, "Rescan (Genesis)");
         menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
         menu.add(0, MENU_BTN_IMPORT,MENU_BTN_IMPORT, "Import Key");
+        menu.add(0, MENU_BTN_RESTORE,MENU_BTN_RESTORE," Restore Wallet");
         return true;
     }
     @Override
@@ -506,6 +508,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case MENU_BTN_IMPORT:
                 waitingToImport = true;
                 scanIntegrator.initiateScan();
+                break;
+
+            case MENU_BTN_RESTORE:
+                restoreWalletDialog.show();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -559,6 +565,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         restoreWalletDialog.dismiss();
                         service.walletPrefix = walletBK.getName().replaceFirst("[.][^.]+$", "");
                         preferences.edit().putString(PREF_KEY_WALLET_PREFIX,service.walletPrefix).commit();
+                        service.setReplayWallet(true);
                         rescanFromCheckpoint(true);
                     }
                 }else{
@@ -809,7 +816,11 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         byte[] seed = MnemonicCode.toSeed(recoveryWords,"");
                         DeterministicSeed dseed = new DeterministicSeed(recoveryWords, seed, "", 1);
                         service.setRecoverySeed(dseed);
-                        startDashService();
+                        if(service.setupCompleted){
+                            rescanFromCheckpoint(true);
+                        }else {
+                            startDashService();
+                        }
                     } catch (MnemonicException e) {
                         restoreWalletDialog.show();
                         e.printStackTrace();
