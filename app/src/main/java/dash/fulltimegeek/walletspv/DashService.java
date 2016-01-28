@@ -32,6 +32,7 @@ public class DashService extends Service implements NewBestBlockListener{
     boolean setupCompleted = false;
     boolean restoringCheckpoint = false;
     boolean restoringGenesis = false;
+    static private boolean replayWallet = false;
     String walletPrefix = null;
     private boolean hasStarted = false;
     DeterministicSeed recoverySeed = null;
@@ -120,11 +121,13 @@ public class DashService extends Service implements NewBestBlockListener{
     }
 
     public void startSyncing() {
+        kit.setReplayWallet(replayWallet);
+        setReplayWallet(false);
         if (!setupCompleted) {
             kit.startAsync();
         } else {
             try {
-                kit.startup(true);
+                kit.startup();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -184,6 +187,12 @@ public class DashService extends Service implements NewBestBlockListener{
             }
         }
     }
+
+    public void setReplayWallet(boolean replay){
+        Log.i(TAG,"setting replay wallet to: "+replay);
+        replayWallet = replay;
+    }
+
 
     public void setWalletPrefix(String prefix){
         walletPrefix = prefix;

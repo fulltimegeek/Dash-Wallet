@@ -33,7 +33,7 @@ public class DashKit extends WalletAppKit {
     final static String defaultWalletExt = ".wallet";
     final static String defaultChainExt = ".spvchain";
     private DeterministicSeed recoverySeed = null;
-    boolean replayWallet = false;
+    private boolean replayWallet = false;
     public DashKit(NetworkParameters params, File directory, String defaultPrefix, String walletPrefix) {
         super(params, directory, defaultPrefix);
         this.walletPrefix = walletPrefix;
@@ -64,8 +64,12 @@ public class DashKit extends WalletAppKit {
             vWalletFile = new File(directory, walletPrefix + defaultWalletExt);
             Log.i(TAG,"Using wallet file:"+vWalletFile.getAbsolutePath());
             boolean shouldReplayWallet = (vWalletFile.exists() && !chainFileExists) || restoreFromSeed != null || replayWallet;
-            replayWallet = false;
             vWallet = createOrLoadWallet(shouldReplayWallet);
+            if(replayWallet) {
+                Log.i(TAG,"RESETTING WALLET");
+                vWallet.reset();
+            }
+            replayWallet = false;
             // Initiate Bitcoin network objects (block store, blockchain and peer group)
             vStore = provideBlockStore(chainFile);
             if (!chainFileExists || restoreFromSeed != null) {
@@ -164,9 +168,14 @@ public class DashKit extends WalletAppKit {
         startUp();
     }
 
-    public void startup(boolean replay) throws Exception{
+    /*public void startup(boolean replay) throws Exception{
         replayWallet = true;
         startUp();
+    }*/
+
+    public void setReplayWallet(boolean replay){
+        Log.i(TAG,"setting replay wallet to: "+replay);
+        replayWallet = replay;
     }
 
     protected void onShutdownCompleted(){}
