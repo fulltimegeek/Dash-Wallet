@@ -446,7 +446,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             BitcoinSerializer.names.put(Transaction.class, "tx");
             Transaction.REFERENCE_DEFAULT_MIN_TX_FEE = Transaction.DEFAULT_MIN_TX_FEE;
         }
-        Coin amountToSend = Coin.parseCoin(amount);
+        final Coin amountToSend = Coin.parseCoin(amount);
         //amountToSend.subtract(Transaction.REFERENCE_DEFAULT_MIN_TX_FEE);
         try {
             Wallet.SendRequest request = Wallet.SendRequest.to(new Address(service.params, recipient), amountToSend);
@@ -457,14 +457,14 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             sendResult.broadcastComplete.addListener(new Runnable() {
                 @Override
                 public void run() {
-                    // The wallet has changed now, it'll get auto saved shortly or when the app shuts down.
-                    Log.i(TAG, "Sent coins onwards! Transaction hash is " + sendResult.tx.getHashAsString());
+
                 }
             }, new Executor() {
                 @Override
                 public void execute(Runnable command) {
-                    sendDialog.dismiss();
-                    resetSendDialog();
+                    //sendDialog.dismiss();
+                    //resetSendDialog();
+                    showToast(MonetaryFormat.BTC.format(amountToSend)+"\nSENT");
                 }
             });
         } catch (InsufficientMoneyException e) {
@@ -475,6 +475,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             e.printStackTrace();
         } catch (Wallet.DustySendRequested e) {
             sendAlert("AMOUNT TOO LOW");
+            showToast("AMOUNT TOO LOW");
             e.printStackTrace();
         }
     }
@@ -882,7 +883,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                                 enterPinDialog.show();
                                 enterPinDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
                             }else{
-                                sendDash(amount,recipient,isIX);
+                                sendCoins(amount, recipient, isIX);
                             }
                         }else{
                             sendAlert("IX -- CONF TOO LOW");
@@ -958,7 +959,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             final boolean isIX = (cbIx.isChecked());
             final String amount = etAmountSending.getText().toString();
             final String recipient = tvRecipient.getText().toString();
-            sendDash(amount, recipient, isIX);
+            sendCoins(amount, recipient, isIX);
         }else if(btnOkEnterPin.getTag().toString().equals("seed")){
             Log.i(TAG,"SHOWING SEED");
             service.kit.wallet().decrypt(key);
@@ -1147,31 +1148,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         t.start();
     }
 
-    public void sendDash(String amount, String recipient, boolean isIX) {
-        if (!service.kit.wallet().isEncrypted()) {
-            sendCoins(amount, recipient, isIX);
-        }
-    }
 
     static ProgressDialog progress = null;
     static boolean ranStartAsync = false;
 
-    /*public void startSyncing() {
-        kit.setDownloadListener(this);
-        if (!ranStartAsync) {
-            ranStartAsync = true;
-            kit.startAsync();
-            showProgress("Please wait","Starting wallet");
-        } else {
-            try {
-                showProgress("Please wait","Rescanning wallet");
-                kit.startup();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-    }*/
 
     public void showProgress(final int type){
         DashGui.currentProgress = type;
