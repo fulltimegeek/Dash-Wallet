@@ -95,6 +95,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int PROGRESS_UNLOCKING = 3;
     final static int PIN_MIN_LENGTH = 6;
     final static int MAX_WORD_LIST = 12;
+    final static public int REQUEST_FILE_SELECT = 1235;
     final static String WALLET_BACKUP_DIR = "/sdcard/dash/backups/";
     final static public File saveDir = new File(WALLET_BACKUP_DIR);
     static int currentProgress = PROGRESS_NONE;
@@ -557,7 +558,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         Log.i(TAG,"onActivityResult() requestCode:"+requestCode+"| resultCode:"+resultCode);
         if (intent != null) {
-            if(requestCode == 1235){
+            if(requestCode == REQUEST_FILE_SELECT){
                 Log.i(TAG,"File selected:"+intent.getExtras().getString("fileSelected"));
                 File walletBK = new File(intent.getExtras().getString("fileSelected"));
                 if(walletBK.exists() && walletBK.canRead()){
@@ -760,14 +761,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                             }else {
                                 final String pin = etPin.getText().toString();
                                 resetEncryptDialog();
-                                //currentProgress = PROGRESS_ENCRYPTING;
                                 showProgress(PROGRESS_ENCRYPTING);
                                 Thread t = new Thread(new Runnable() {
                                     @Override
                                     public void run() {
                                         service.kit.wallet().encrypt(pin);
                                         dismissProgress();
-                                        //currentProgress = PROGRESS_NONE;
                                         showProgress(PROGRESS_NONE);
                                         buildMenuButtons(MENU_OTHER);
                                     }
@@ -833,7 +832,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 restoreWalletDialog.show();
                 break;
             case R.id.img_logo:
-                //buildMenuButtons(MENU_MAIN);
                 openOptionsMenu();
                 break;
             case R.id.btn_main_menu:
@@ -923,7 +921,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 backupDialog.show();
                 break;
             case R.id.btn_to_file:
-                //File saveDir = new File(WALLET_BACKUP_DIR);
                 if(saveDir.mkdirs() || saveDir.exists()){
                     File save = new File(saveDir.getPath()+"/"+System.currentTimeMillis()+".wallet");
                     try {
@@ -938,7 +935,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 break;
             case R.id.btn_restore_wallet_file:
                 if(saveDir.mkdirs() || saveDir.exists()) {
-                    startActivityForResult(new Intent(activity, br.com.thinkti.android.filechooser.FileChooser.class), 1235);
+                    startActivityForResult(new Intent(activity, br.com.thinkti.android.filechooser.FileChooser.class), REQUEST_FILE_SELECT);
                 }
                 break;
             default:
