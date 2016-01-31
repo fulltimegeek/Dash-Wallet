@@ -24,11 +24,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -131,6 +133,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     Dialog backupDialog;
     Dialog seedBoxDialog;
     Dialog enterWordDialog;
+    Dialog historyDialog;
+    ListView historyListView;
     ImageView qrImg;
     ImageView logo;
     static boolean waitingToSend = false;
@@ -354,31 +358,36 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         initWalletDialog = new Dialog(activity);
         initWalletDialog.setCancelable(false);
         initWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        initWalletDialog.setContentView(inflater.inflate(R.layout.layout_init_wallet,null));
+        initWalletDialog.setContentView(inflater.inflate(R.layout.layout_init_wallet, null));
         restoreWalletDialog = new Dialog(activity);
         restoreWalletDialog.setCancelable(false);
         restoreWalletDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        restoreWalletDialog.setContentView(inflater.inflate(R.layout.layout_restore_wallet_dialog,null));
+        restoreWalletDialog.setContentView(inflater.inflate(R.layout.layout_restore_wallet_dialog, null));
         encryptDialog = new Dialog(activity);
         encryptDialog.setCancelable(true);
         encryptDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        encryptDialog.setContentView(inflater.inflate(R.layout.layout_encrypt,null));
+        encryptDialog.setContentView(inflater.inflate(R.layout.layout_encrypt, null));
         enterPinDialog = new Dialog(activity);
         enterPinDialog.setCancelable(true);
         enterPinDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        enterPinDialog.setContentView(inflater.inflate(R.layout.layout_enter_pin,null));
+        enterPinDialog.setContentView(inflater.inflate(R.layout.layout_enter_pin, null));
         backupDialog = new Dialog(activity);
         backupDialog.setCancelable(true);
         backupDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        backupDialog.setContentView(inflater.inflate(R.layout.layout_backup,null));
+        backupDialog.setContentView(inflater.inflate(R.layout.layout_backup, null));
         seedBoxDialog = new Dialog(activity);
         seedBoxDialog.setCancelable(true);
         seedBoxDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        seedBoxDialog.setContentView(inflater.inflate(R.layout.layout_show_seed,null));
+        seedBoxDialog.setContentView(inflater.inflate(R.layout.layout_show_seed, null));
         enterWordDialog = new Dialog(activity);
         enterWordDialog.setCancelable(false);
         enterWordDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        enterWordDialog.setContentView(inflater.inflate(R.layout.layout_enter_word,null));
+        enterWordDialog.setContentView(inflater.inflate(R.layout.layout_enter_word, null));
+        historyDialog = new Dialog(activity);
+        historyDialog.setCancelable(true);
+        historyDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        historyListView = new ListView(activity);
+        historyDialog.setContentView(historyListView);
     }
 
     public void setupTextViews() {
@@ -419,10 +428,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 public void run() {
                     try {
                         if (service != null && service.setupCompleted && service.kit != null && service.kit.wallet() != null) {
-                            tvBalance.setText(MonetaryFormat.BTC.format(service.kit.wallet().getBalance()));
+                            tvBalance.setText(service.kit.wallet().getBalance().toFriendlyString());
                             if (service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance()).isPositive()) {
                                 rlPending.setVisibility(View.VISIBLE);
-                                tvPending.setText("+(" + MonetaryFormat.BTC.format(Coin.valueOf(service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance()).getValue())) + ")");
+                                tvPending.setText("+(" + service.kit.wallet().getBalance(Wallet.BalanceType.ESTIMATED).subtract(service.kit.wallet().getBalance()).toFriendlyString() + ")");
                             } else {
                                 rlPending.setVisibility(View.INVISIBLE);
 
@@ -937,6 +946,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 if(saveDir.mkdirs() || saveDir.exists()) {
                     startActivityForResult(new Intent(activity, br.com.thinkti.android.filechooser.FileChooser.class), REQUEST_FILE_SELECT);
                 }
+                break;
+            case R.id.btn_history:
+                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
+                TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
+                historyListView.setAdapter(adapter);
+                historyDialog.show();
                 break;
             default:
                 break;
