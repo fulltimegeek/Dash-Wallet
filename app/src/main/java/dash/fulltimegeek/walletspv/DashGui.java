@@ -985,7 +985,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             sendCoins(amount, recipient, isIX);
         }else if(btnOkEnterPin.getTag().toString().equals("seed")){
             Log.i(TAG,"SHOWING SEED");
-            service.kit.wallet().decrypt(key);
             String tmpMnemonic = "";
             for(String word : service.kit.wallet().getKeyChainSeed().getMnemonicCode()){
                 tmpMnemonic = tmpMnemonic.equals("")?word:tmpMnemonic+" "+word;
