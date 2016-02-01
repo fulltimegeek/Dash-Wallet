@@ -948,10 +948,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_history:
-                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-                TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
-                historyListView.setAdapter(adapter);
-                historyDialog.show();
+                //List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
+                //TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
+                //historyListView.setAdapter(adapter);
+                //historyDialog.show();
                 break;
             default:
                 break;
