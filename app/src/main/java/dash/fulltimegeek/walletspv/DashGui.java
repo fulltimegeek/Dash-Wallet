@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -82,7 +83,7 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 
-public class DashGui extends Activity implements PeerDataEventListener, PeerConnectionEventListener, WalletEventListener, NewBestBlockListener, Button.OnClickListener {
+public class DashGui extends Activity implements PeerDataEventListener, PeerConnectionEventListener, WalletEventListener, NewBestBlockListener, Button.OnClickListener, AdapterView.OnItemClickListener {
 
     final static String TAG = "DashGui.java";
     static public DashGui activity;
@@ -386,8 +387,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         historyDialog = new Dialog(activity);
         historyDialog.setCancelable(true);
         historyDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        historyListView = new ListView(activity);
-        historyDialog.setContentView(historyListView);
+        historyDialog.setContentView(inflater.inflate(R.layout.layout_history,null));
+        ListView lv = (ListView) historyDialog.findViewById(R.id.lv_history);
+        lv.setOnItemClickListener(this);
+        historyListView = lv;
     }
 
     public void setupTextViews() {
@@ -948,10 +951,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_history:
-                //List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-                //TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
-                //historyListView.setAdapter(adapter);
-                //historyDialog.show();
+                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
+                TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
+                historyListView.setAdapter(adapter);
+                historyDialog.show();
                 break;
             default:
                 break;
@@ -1340,5 +1343,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             }
         }
         return full;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.i(TAG,position+" Item clicked!");
     }
 }
