@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -83,7 +84,8 @@ import java.util.concurrent.Executor;
 import javax.annotation.Nullable;
 
 
-public class DashGui extends Activity implements PeerDataEventListener, PeerConnectionEventListener, WalletEventListener, NewBestBlockListener, Button.OnClickListener, AdapterView.OnItemClickListener {
+public class DashGui extends Activity implements PeerDataEventListener, PeerConnectionEventListener,
+        WalletEventListener, NewBestBlockListener, Button.OnClickListener, AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
 
     final static String TAG = "DashGui.java";
     static public DashGui activity;
@@ -390,6 +392,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         historyDialog.setContentView(inflater.inflate(R.layout.layout_history,null));
         ListView lv = (ListView) historyDialog.findViewById(R.id.lv_history);
         lv.setOnItemClickListener(this);
+        lv.setOnScrollListener(this);
         historyListView = lv;
     }
 
@@ -729,11 +732,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
         Log.i(TAG,"onCoinsReceived calling updateBalance");
         updateBalance();
+        populateHistory();
     }
 
     @Override
     public void onCoinsSent(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-
+        List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
+        populateHistory();
     }
 
 
@@ -951,9 +956,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_history:
-                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-                TransactionListAdapter adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
-                historyListView.setAdapter(adapter);
+                populateHistory();
                 historyDialog.show();
                 break;
             default:
@@ -1348,5 +1351,37 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Log.i(TAG,position+" Item clicked!");
+    }
+
+    TransactionListAdapter adapter = null;
+    public void populateHistory(){
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0,10));
+                adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
+                historyListView.setAdapter(adapter);
+            }
+        });
+    }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, final int totalItemCount) {
+        Log.i(TAG,"first: "+firstVisibleItem+"| visible: "+visibleItemCount+"| total: "+totalItemCount);
+        if(firstVisibleItem+visibleItemCount == totalItemCount && service != null && service.kit.wallet().getTransactions(false).size() > totalItemCount+1) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Transaction tx = service.kit.wallet().getTransactionsByTime().get(totalItemCount + 1);
+                    if(tx != null)
+                        adapter.add(tx);
+                }
+            });
+        }
     }
 }
