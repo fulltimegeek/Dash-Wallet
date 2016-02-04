@@ -1403,7 +1403,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0, 10));
+                    int txCount = service.kit.wallet().getTransactionsByTime().size();
+                    int max = txCount < 10?txCount:10;
+                    List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0, txCount));
                     adapter = new TransactionListAdapter(activity, R.layout.layout_history_row, txes);
                     historyListView.setAdapter(adapter);
                 }
