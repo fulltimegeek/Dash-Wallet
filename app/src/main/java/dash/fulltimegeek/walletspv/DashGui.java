@@ -597,6 +597,9 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         Log.i(TAG,"onActivityResult() requestCode:"+requestCode+"| resultCode:"+resultCode);
+        if(requestCode == 4321) {
+            receiveDialog.dismiss();
+        }
         if (intent != null) {
             if(requestCode == REQUEST_FILE_SELECT){
                 Log.i(TAG,"File selected:"+intent.getExtras().getString("fileSelected"));
@@ -1115,7 +1118,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
         share.putExtra(Intent.EXTRA_SUBJECT, "Dash Payment Request");
         share.putExtra(Intent.EXTRA_TEXT, service.kit.wallet().currentReceiveAddress().toString());
-        startActivity(share);
+        startActivityForResult(share, 4321);
     }
 
     boolean restoringCheckpoint = false;
