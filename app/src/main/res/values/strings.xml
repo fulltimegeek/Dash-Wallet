@@ -44,5 +44,7 @@
     <string name="openFolder">Open folder</string>
     <string name="selectThis">Select this</string>
     <string name="optionSelection">Option selection</string>
+    <string name="decrypt">Unencrypt Wallet</string>
+    <string name="wallet_unencrypted">Wallet is now unencrypted</string>
 
 </resources>

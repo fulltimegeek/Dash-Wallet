@@ -229,6 +229,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             service.gui = activity;
             service.setListeners(activity);
             updateGUI();
+            menuChangePassDetect();
             if(defaultWalletExists()){
                 startDashService(); // only starts if not already running
             }else if(!service.hasStarted() && currentProgress == PROGRESS_NONE){
@@ -501,15 +502,40 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int MENU_BTN_RESCAN_CHECKPOINT = 2;
     final static int MENU_BTN_RESCAN_GENESIS = 3;
     final static int MENU_BTN_RESTORE = 4;
+    final static int MENU_BTN_CHANGE_PASS = 5;
+    Menu menu = null;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         Log.i("MainScreen.java","Creating Options Menu");
+        this.menu = menu;
         menu.add(0, MENU_BTN_RESCAN_GENESIS, MENU_BTN_RESCAN_GENESIS, "Rescan (Genesis)");
         menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
         menu.add(0, MENU_BTN_IMPORT,MENU_BTN_IMPORT, "Import Key");
         menu.add(0, MENU_BTN_RESTORE,MENU_BTN_RESTORE," Restore Wallet");
+        menu.add(0, MENU_BTN_CHANGE_PASS,MENU_BTN_CHANGE_PASS,getString(R.string.decrypt));
         return true;
     }
+
+    public boolean gotWallet(){
+        return service != null && service.kit !=null && service.kit.wallet() != null;
+    }
+
+    public void menuChangePassDetect(){
+        if(gotWallet() && service.kit.wallet().isEncrypted() && menu != null) {
+            if(menu.findItem(MENU_BTN_CHANGE_PASS) == null) {
+                menu.add(0, MENU_BTN_CHANGE_PASS, MENU_BTN_CHANGE_PASS, getString(R.string.decrypt));
+            }
+        }else if(menu !=null && gotWallet() && !service.kit.wallet().isEncrypted()){
+            menu.removeItem(MENU_BTN_CHANGE_PASS);
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menuChangePassDetect();
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -529,6 +555,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case MENU_BTN_RESTORE:
                 restoreWalletDialog.show();
                 break;
+            case MENU_BTN_CHANGE_PASS:
+                btnOkEnterPin.setTag("decrypt");
+                enterPinDialog.show();
+                enterPinDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -562,11 +592,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             }
         }
         return newFile;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -984,6 +1009,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     public void onWalletUnlockSuccess(KeyCrypter crypter, KeyParameter key){
         showProgress(PROGRESS_NONE);
+        boolean encrypt = true;
         if(btnOkEnterPin.getTag().toString().equals("send")){
             final boolean isIX = (cbIx.isChecked());
             final String amount = etAmountSending.getText().toString();
@@ -1008,8 +1034,14 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 importKey(tmpKey);
             }
             tmpKey = null;
+        }else if(btnOkEnterPin.getTag().toString().equals("decrypt")){
+            showToast(getString(R.string.wallet_unencrypted));
+            encrypt = false;
+            if(currentMenu == MENU_OTHER)
+                buildMenuButtons(MENU_OTHER);
         }
-        service.kit.wallet().encrypt(crypter, key);
+        if(encrypt)
+            service.kit.wallet().encrypt(crypter, key);
     }
 
     public void unlockWallet(final String pin){
@@ -1037,7 +1069,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         if(service.kit.wallet().isEncrypted() && pin != null && !pin.equals("")) {
             unlockWallet(pin);
         }
-
         etEnterPin.setText("");
         enterPinDialog.dismiss();
     }
@@ -1314,7 +1345,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void updateGUI(){
         updateBalance();
         updateBlockHeight(null);
-        populateHistory();
+        if(gotWallet() && service.kit.wallet().getTransactionsByTime().get(0).getConfidence().getDepthInBlocks() < 7)
+            populateHistory(); // we only need to update history if icons change
     }
 
     private void resetEnterWord(){
@@ -1375,13 +1407,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, final int totalItemCount) {
-        Log.i(TAG,"first: "+firstVisibleItem+"| visible: "+visibleItemCount+"| total: "+totalItemCount);
         if(firstVisibleItem+visibleItemCount == totalItemCount && service != null && service.kit.wallet().getTransactions(false).size() > totalItemCount+1) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Transaction tx = service.kit.wallet().getTransactionsByTime().get(totalItemCount + 1);
-                    if(tx != null)
+                    if(tx != null && adapter != null)
                         adapter.add(tx);
                 }
             });
