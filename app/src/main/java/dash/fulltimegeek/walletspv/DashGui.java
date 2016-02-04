@@ -15,9 +15,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
-import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,7 +26,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -57,7 +56,6 @@ import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.VerificationException;
 import org.bitcoinj.core.Wallet;
 import org.bitcoinj.crypto.KeyCrypter;
-import org.bitcoinj.crypto.KeyCrypterException;
 import org.bitcoinj.crypto.MnemonicCode;
 import org.bitcoinj.core.listeners.*;
 import org.bitcoinj.crypto.MnemonicException;
@@ -592,6 +590,15 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             }
         }
         return newFile;
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BACK && currentMenu == MENU_OTHER) {
+			buildMenuButtons(MENU_MAIN);
+            return true;
+		}
+		return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -1212,7 +1219,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
 
     static ProgressDialog progress = null;
-    static boolean ranStartAsync = false;
 
 
     public void showProgress(final int type){
