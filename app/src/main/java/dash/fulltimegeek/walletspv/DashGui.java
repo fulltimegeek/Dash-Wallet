@@ -444,6 +444,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         }
                     }catch (NullPointerException e){
                         e.printStackTrace();
+                    }catch (IllegalStateException e){
+                        e.printStackTrace();
                     }
                 }
             });
@@ -1354,7 +1356,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void updateGUI(){
         updateBalance();
         updateBlockHeight(null);
-        if(gotWallet() && service.kit.wallet().getTransactionsByTime().get(0).getConfidence().getDepthInBlocks() < 7)
+        if(gotWallet() && service.kit.wallet().getTransactionsByTime().size() > 0 && service.kit.wallet().getTransactionsByTime().get(0).getConfidence().getDepthInBlocks() < 7)
             populateHistory(); // we only need to update history if icons change
     }
 
