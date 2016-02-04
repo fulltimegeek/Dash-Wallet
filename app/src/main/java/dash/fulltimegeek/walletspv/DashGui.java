@@ -715,7 +715,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void onWalletChanged(Wallet wallet) {
         //Log.i(TAG,"onWalletChanged calling updateBalance");
-        updateBalance();
+        updateGUI();
     }
 
     @Override
@@ -732,13 +732,13 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
         Log.i(TAG,"onCoinsReceived calling updateBalance");
         updateBalance();
-        populateHistory();
+        //populateHistory();
     }
 
     @Override
     public void onCoinsSent(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
         List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-        populateHistory();
+        //populateHistory();
     }
 
 
@@ -1314,6 +1314,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void updateGUI(){
         updateBalance();
         updateBlockHeight(null);
+        populateHistory();
     }
 
     private void resetEnterWord(){
@@ -1355,14 +1356,16 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     TransactionListAdapter adapter = null;
     public void populateHistory(){
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0,10));
-                adapter = new TransactionListAdapter(activity,R.layout.layout_history_row,txes);
-                historyListView.setAdapter(adapter);
-            }
-        });
+        if(service != null && service.kit != null && service.kit.wallet() != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0, 10));
+                    adapter = new TransactionListAdapter(activity, R.layout.layout_history_row, txes);
+                    historyListView.setAdapter(adapter);
+                }
+            });
+        }
     }
 
     @Override

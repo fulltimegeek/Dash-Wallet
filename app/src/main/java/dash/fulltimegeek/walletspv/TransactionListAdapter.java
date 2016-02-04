@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 
@@ -58,7 +59,7 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
         TextView tvAddress = (TextView) row.findViewById(R.id.tv_history_row_address);
         TextView tvAmount = (TextView) row.findViewById(R.id.tv_history_row_amount);
         TextView tvTime = (TextView) row.findViewById(R.id.tv_history_row_time);
-        TextView tvConf = (TextView) row.findViewById(R.id.tv_history_row_conf);
+        ImageView ivConf = (ImageView) row.findViewById(R.id.iv_history_row_conf);
 
 
         Address address =  null;
@@ -92,8 +93,22 @@ public class TransactionListAdapter extends ArrayAdapter<Transaction> {
             tvAddress.setText(address.toString());
             tvAmount.setText(value);
         }
-        String confirmations = tx.getConfidence().getDepthInBlocks()>=6?"C":tx.getConfidence().getDepthInBlocks()+ "C";
-        tvConf.setText(confirmations);
+        int depth = tx.getConfidence().getDepthInBlocks();
+        if(depth >= 6){
+            ivConf.setImageResource(R.drawable.check);
+        }if(depth == 5){
+            ivConf.setImageResource(R.drawable.clock5);
+        }if(depth == 4){
+            ivConf.setImageResource(R.drawable.clock4);
+        }if(depth == 3){
+            ivConf.setImageResource(R.drawable.clock3);
+        }if(depth == 2){
+            ivConf.setImageResource(R.drawable.clock2);
+        }if(depth == 1){
+            ivConf.setImageResource(R.drawable.clock1);
+        }if(depth == 0){
+            ivConf.setImageResource(R.drawable.transaction0);
+        }
         return row;
 
     }
