@@ -949,7 +949,17 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                                 sendCoins(amount, recipient, isIX);
                             }
                         }else{
-                            sendAlert("IX -- CONF TOO LOW");
+                            int toGo = 0;
+                            CustomCoinSelector cs = new CustomCoinSelector();
+                            for(int i=6;i > 0;i--) {
+                                cs.setMinConf(i);
+                                if (service.kit.wallet().getBalance(cs).subtract(minFee).isPositive()) {
+                                    break;
+                                }else{
+                                    toGo++;
+                                }
+                            }
+                            sendAlert("IX: +"+toGo+"conf(s) required");
                         }
                     }else{
                         sendAlert("INSUFFICIENT FUNDS");
