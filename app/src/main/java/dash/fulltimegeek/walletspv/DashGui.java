@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -765,17 +766,29 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     }
 
+    MediaPlayer mPlayer = null;
     @Override
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
         Log.i(TAG,"onCoinsReceived calling updateBalance");
         updateBalance();
-        //populateHistory();
+        if(mPlayer == null) {
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }else if(!mPlayer.isPlaying()){
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }
     }
 
     @Override
     public void onCoinsSent(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-        List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-        //populateHistory();
+        if(mPlayer == null) {
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }else if(!mPlayer.isPlaying()){
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }
     }
 
 
@@ -959,7 +972,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                                     toGo++;
                                 }
                             }
-                            sendAlert("IX: +"+toGo+"conf(s) required");
+                            sendAlert("To send an InstantX transaction,\n"+toGo+" more confirmations are required.");
                         }
                     }else{
                         sendAlert("INSUFFICIENT FUNDS");
