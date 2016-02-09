@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dash Plånbok</string>
+    <string name="action_settings">Inställningar</string>
+    <string name="amount">Summa:</string>
+    <string name="backup">Backup</string>
+    <string name="backup_wallet">Backup</string>
+    <string name="balance">Saldo:</string>
+    <string name="cancel">Avbryt</string>
+    <string name="confirm">Bekräfta:</string>
+    <string name="create_new">Skapa Ny</string>
+    <string name="currentDir">Aktuell mapp</string>
+    <string name="encrypt">Kryptera</string>
+    <string name="enter_pin">Ange pin</string>
+    <string name="fee">(avgift 0,01)</string>
+    <string name="fileSize">Fil Storlek</string>
+    <string name="folder">Mapp</string>
+    <string name="history">Historik</string>
+    <string name="ix">IX</string>
+    <string name="main_menu">Huvudmeny</string>
+    <string name="ok">Ok</string>
+    <string name="openFolder">Öppna mapp</string>
+    <string name="optionSelection">Option selection</string>
+    <string name="other">Övrigt</string>
+    <string name="parentDirectory">Förälder Mapp</string>
+    <string name="pending">Inkommande</string>
+    <string name="pin">Pin:</string>
+    <string name="restore">Återställ</string>
+    <string name="restore_wallet">Återställ Plånbok</string>
+    <string name="scan_qr">QR</string>
+    <string name="send">Skicka</string>
+    <string name="receive">Ta emot</string>
+    <string name="from_seed">Från Frö</string>
+    <string name="from_file">Från Fil</string>
+    <string name="initialize_wallet">Initiera Plånbok</string>
+    <string name="of">av</string>
+    <string name="recipient">Mottagare</string>
+    <string name="seed">Frö</string>
+    <string name="selectThis">Välj det här</string>
+    <string name="share">Dela</string>
+    <string name="show_seed">Visa Frö</string>
+    <string name="to_file">Till Fil</string>
+    <string name="decrypt">Avkryptera Plånbok</string>
+    <string name="wallet_unencrypted">Plånboken är nu okrypterad</string>
+    <string name="word">Ord</string>
+
+</resources>
