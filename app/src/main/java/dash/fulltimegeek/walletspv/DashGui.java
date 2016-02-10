@@ -930,6 +930,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_cancel_receive:
+                receiveDialog = null;
                 receiveDialog.dismiss();
                 break;
             case R.id.btn_send:
@@ -1005,7 +1006,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         service.kit.wallet().saveToFile(save);
                         backupDialog.dismiss();
                     } catch (IOException e) {
-                        Log.i(TAG,"Failed to save wallet to:"+save.getAbsolutePath());
+                        Log.i(TAG,"Failed to save wallet to: "+save.getAbsolutePath());
                         e.printStackTrace();
                     }
                 }

@@ -43,5 +43,6 @@
     <string name="decrypt">Unencrypt Wallet</string>
     <string name="wallet_unencrypted">Wallet is now unencrypted</string>
     <string name="word">Word</string>
+    <string name="toast_crash">Dash Wallet has stopped working</string>
 
 </resources>

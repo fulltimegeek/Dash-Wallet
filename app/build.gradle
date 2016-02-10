@@ -41,4 +41,5 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.7.0'
     compile 'com.google.zxing:android-integration:3.2.1'
     compile 'com.google.zxing:core:3.2.1'
+    compile 'ch.acra:acra:4.5.0'
 }
