@@ -45,4 +45,12 @@
     <string name="selectThis">Select this</string>
     <string name="optionSelection">Option selection</string>
 
+    <string name="sendDashDialogTitle">Send Dash</string>
+    <string name="sendDashDialogPositiveButton">@string/send</string>
+    <string name="sendDashDialogNegativeButton">@string/cancel</string>
+    <string name="sendDashDialogAmountHint">Amount (balance: %s)</string>
+    <string name="sendDashDialogRecipientHint">Recipient address</string>
+    <string name="sendDashDialogInstantXText">Instant transaction</string>
+    <string name="sendDashDialogInstantXFeeText">@string/fee</string>
+
 </resources>
