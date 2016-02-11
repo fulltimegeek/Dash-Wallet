@@ -930,7 +930,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 }
                 break;
             case R.id.btn_cancel_receive:
-                receiveDialog = null;
                 receiveDialog.dismiss();
                 break;
             case R.id.btn_send:
