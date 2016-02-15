@@ -4,24 +4,22 @@
     android:versionCode="020"
     android:versionName="Dash Wallet(Alpha)">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:name=".AcraReport"
         android:icon="@drawable/dash_icon"
-        android:label="@string/app_name" >
-        <activity
-            android:name=".DashGui">
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+        <activity android:name=".DashGui">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity
-            android:name="br.com.thinkti.android.filechooser.FileChooser">
-        </activity>
+        <activity android:name="br.com.thinkti.android.filechooser.FileChooser" />
 
         <service
             android:name=".DashService"

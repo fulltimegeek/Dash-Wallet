@@ -46,4 +46,12 @@
     <string name="of">of</string>
     <string name="toast_crash">Dash Wallet has stopped working</string>
 
+    <string name="sendDashDialogTitle">Send Dash</string>
+    <string name="sendDashDialogPositiveButton">@string/send</string>
+    <string name="sendDashDialogNegativeButton">@string/cancel</string>
+    <string name="sendDashDialogAmountHint">Amount (balance: %s)</string>
+    <string name="sendDashDialogRecipientHint">Recipient address</string>
+    <string name="sendDashDialogInstantXText">Instant transaction</string>
+    <string name="sendDashDialogInstantXFeeText">@string/fee</string>
+
 </resources>
