@@ -106,18 +106,6 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
-        <TextView
-            android:id="@+id/tv_alert_send"
-            android:textColor="#f00"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:visibility="invisible"
-            android:text=""
-            android:layout_marginTop="10dp"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/tv_send_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
         <CheckBox
             android:id="@+id/cb_ix"
             android:text="@string/ix"
@@ -133,7 +121,7 @@
         <TextView
             android:id="@+id/tv_ix_fee"
             android:textColor="#f00"
-            android:textSize="15sp"
+            android:textSize="11sp"
             android:visibility="visible"
             android:text="@string/fee"
             android:layout_marginTop="10dp"
@@ -141,10 +129,24 @@
             android:layout_below="@id/tv_send_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_alert_send"
+            android:textColor="#f00"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:visibility="invisible"
+            android:gravity="left"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@+id/tv_ix_fee"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="3dp"
+            android:layout_below="@id/tv_send_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
         <LinearLayout
             android:layout_marginTop="15dp"
             android:gravity="center"
-            android:layout_below="@id/cb_ix"
+            android:layout_below="@id/tv_alert_send"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
         <Button

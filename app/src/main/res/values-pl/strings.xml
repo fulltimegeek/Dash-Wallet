@@ -40,4 +40,9 @@
     <string name="share">Udostępnij</string>
     <string name="show_seed">Pokaż Ziarna</string>
     <string name="to_file">Do pliku</string>
+    <string name="decrypt">Unencrypt Wallet</string>
+    <string name="wallet_unencrypted">Wallet is now unencrypted</string>
+    <string name="word">Word</string>
+    <string name="toast_crash">Dash Wallet has stopped working</string>
+
 </resources>
