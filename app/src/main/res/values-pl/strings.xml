@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dash Wallet</string>
+    <string name="action_settings">Ustawienia</string>
+    <string name="amount">Suma:</string>
+    <string name="backup">Archiwizacja</string>
+    <string name="backup_wallet">Archiwizuj</string>
+    <string name="balance">Saldo:</string>
+    <string name="cancel">Anuluj</string>
+    <string name="confirm">Zatwierdź:</string>
+    <string name="create_new">Utwórz nowy</string>
+    <string name="currentDir">Aktualny katalog</string>
+    <string name="encrypt">Zaszyfruj</string>
+    <string name="enter_pin">Wprowadź pin</string>
+    <string name="fee">(opłata 0,01)</string>
+    <string name="fileSize">Rozmiar pliku</string>
+    <string name="folder">Folder</string>
+    <string name="history">Historia</string>
+    <string name="ix">IX</string>
+    <string name="main_menu">Menu Główne</string>
+    <string name="ok">Ok</string>
+    <string name="openFolder">Otwórz folder</string>
+    <string name="optionSelection">Opcje zaznaczenia</string>
+    <string name="other">Inne</string>
+    <string name="parentDirectory">Katalog nadrzędny</string>
+    <string name="pending">Oczekuje</string>
+    <string name="pin">Pin:</string>
+    <string name="restore">Przywróć</string>
+    <string name="restore_wallet">Przywróć Portfel</string>
+    <string name="scan_qr">Skanuj kod QR</string>
+    <string name="send">Wyślij</string>
+    <string name="receive">Odbierz</string>
+    <string name="from_file">Z pliku</string>
+    <string name="from_seed">Z Ziarna</string>
+    <string name="initialize_wallet">Zainicjuj portfel</string>
+    <string name="of">z</string>
+    <string name="recipient">Odbiorca</string>
+    <string name="seed">Ziarno</string>
+    <string name="selectThis">Wybierz</string>
+    <string name="share">Udostępnij</string>
+    <string name="show_seed">Pokaż Ziarna</string>
+    <string name="to_file">Do pliku</string>
+    <string name="decrypt">Unencrypt Wallet</string>
+    <string name="wallet_unencrypted">Wallet is now unencrypted</string>
+    <string name="word">Word</string>
+    <string name="toast_crash">Dash Wallet has stopped working</string>
+
+</resources>

@@ -9,9 +9,6 @@ android {
         targetSdkVersion 14
         versionCode 1
         versionName "0.0.15"
-
-        // Enabling multidex support.
-        multiDexEnabled true
     }
 
     buildTypes {
@@ -44,6 +41,7 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp:2.7.0'
     compile 'com.google.zxing:android-integration:3.2.1'
     compile 'com.google.zxing:core:3.2.1'
+    compile 'ch.acra:acra:4.5.0'
 
     compile 'com.android.support:design:23.1.1'
     compile 'com.android.support:appcompat-v7:23.1.1'

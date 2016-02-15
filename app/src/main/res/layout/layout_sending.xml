@@ -49,6 +49,7 @@
             android:layout_marginBottom="4dp"
             android:fontFamily="sans-serif-light"
             android:gravity="center"
+<<<<<<< HEAD
             android:text="Scan QR"
             android:textColor="@android:color/white"
             android:textSize="15sp"
@@ -84,6 +85,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
+=======
+            android:layout_marginTop="2dp"
+            android:layout_marginRight="10dp"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@id/et_amount_send"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+>>>>>>> a5e2b767b407ede4cb7e4397596b50c698ca156b
 
         <CheckBox
             android:id="@+id/cb_ix"
@@ -99,6 +108,7 @@
 
         <TextView
             android:id="@+id/tv_ix_fee"
+<<<<<<< HEAD
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -120,3 +130,53 @@
 
     </LinearLayout>
 </LinearLayout>
+=======
+            android:textColor="#f00"
+            android:textSize="11sp"
+            android:visibility="visible"
+            android:text="@string/fee"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@+id/cb_ix"
+            android:layout_below="@id/tv_send_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/tv_alert_send"
+            android:textColor="#f00"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:visibility="invisible"
+            android:gravity="left"
+            android:layout_marginTop="10dp"
+            android:layout_toLeftOf="@+id/tv_ix_fee"
+            android:layout_alignParentLeft="true"
+            android:layout_marginRight="3dp"
+            android:layout_below="@id/tv_send_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_marginTop="15dp"
+            android:gravity="center"
+            android:layout_below="@id/tv_alert_send"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/btn_ok_send"
+            android:text="@string/ok"
+            android:textAllCaps="true"
+            android:layout_weight=".5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btn_cancel_send"
+            android:text="@string/cancel"
+            android:textAllCaps="true"
+            android:layout_weight=".5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
+>>>>>>> a5e2b767b407ede4cb7e4397596b50c698ca156b

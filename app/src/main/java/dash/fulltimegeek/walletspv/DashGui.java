@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,6 +20,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -233,7 +235,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             service.gui = activity;
             service.setListeners(activity);
             updateGUI();
-            if (defaultWalletExists()) {
+            menuChangePassDetect();
+            if(defaultWalletExists()){
                 startDashService(); // only starts if not already running
             } else if (!service.hasStarted() && currentProgress == PROGRESS_NONE) {
                 initWalletDialog.show();
@@ -467,13 +470,15 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         } else {
                             rlPending.setVisibility(View.INVISIBLE);
 
+                            }
                         }
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                    }catch (IllegalStateException e){
+                        e.printStackTrace();
                     }
-                } catch (NullPointerException e) {
-                    e.printStackTrace();
                 }
-            }
-        });
+            });
 
     }
 
@@ -527,15 +532,38 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     final static int MENU_BTN_RESCAN_CHECKPOINT = 2;
     final static int MENU_BTN_RESCAN_GENESIS = 3;
     final static int MENU_BTN_RESTORE = 4;
-
+    final static int MENU_BTN_CHANGE_PASS = 5;
+    Menu menu = null;
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        Log.i("MainScreen.java", "Creating Options Menu");
+        Log.i("MainScreen.java","Creating Options Menu");
+        this.menu = menu;
         menu.add(0, MENU_BTN_RESCAN_GENESIS, MENU_BTN_RESCAN_GENESIS, "Rescan (Genesis)");
         menu.add(0, MENU_BTN_RESCAN_CHECKPOINT, MENU_BTN_RESCAN_CHECKPOINT, "Rescan (Checkpoint)");
-        menu.add(0, MENU_BTN_IMPORT, MENU_BTN_IMPORT, "Import Key");
-        menu.add(0, MENU_BTN_RESTORE, MENU_BTN_RESTORE, " Restore Wallet");
+        menu.add(0, MENU_BTN_IMPORT,MENU_BTN_IMPORT, "Import Key");
+        menu.add(0, MENU_BTN_RESTORE,MENU_BTN_RESTORE," Restore Wallet");
+        menu.add(0, MENU_BTN_CHANGE_PASS,MENU_BTN_CHANGE_PASS,getString(R.string.decrypt));
         return true;
+    }
+
+    public boolean gotWallet(){
+        return service != null && service.kit !=null && service.kit.wallet() != null;
+    }
+
+    public void menuChangePassDetect(){
+        if(gotWallet() && service.kit.wallet().isEncrypted() && menu != null) {
+            if(menu.findItem(MENU_BTN_CHANGE_PASS) == null) {
+                menu.add(0, MENU_BTN_CHANGE_PASS, MENU_BTN_CHANGE_PASS, getString(R.string.decrypt));
+            }
+        }else if(menu !=null && gotWallet() && !service.kit.wallet().isEncrypted()){
+            menu.removeItem(MENU_BTN_CHANGE_PASS);
+        }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        menuChangePassDetect();
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
@@ -557,6 +585,10 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
             case MENU_BTN_RESTORE:
                 restoreWalletDialog.show();
                 break;
+            case MENU_BTN_CHANGE_PASS:
+                btnOkEnterPin.setTag("decrypt");
+                enterPinDialog.show();
+                enterPinDialog.getWindow().setSoftInputMode (WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -593,13 +625,20 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_HOME || keyCode == KeyEvent.KEYCODE_BACK && currentMenu == MENU_OTHER) {
+			buildMenuButtons(MENU_MAIN);
+            return true;
+		}
+		return super.onKeyDown(keyCode, event);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        Log.i(TAG, "onActivityResult() requestCode:" + requestCode + "| resultCode:" + resultCode);
+        Log.i(TAG,"onActivityResult() requestCode:"+requestCode+"| resultCode:"+resultCode);
+        if(requestCode == 4321) {
+            receiveDialog.dismiss();
+        }
         if (intent != null) {
             if (requestCode == REQUEST_FILE_SELECT) {
                 Log.i(TAG, "File selected:" + intent.getExtras().getString("fileSelected"));
@@ -742,7 +781,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     @Override
     public void onWalletChanged(Wallet wallet) {
         //Log.i(TAG,"onWalletChanged calling updateBalance");
-        updateBalance();
+        updateGUI();
     }
 
     @Override
@@ -755,17 +794,29 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     }
 
+    MediaPlayer mPlayer = null;
     @Override
     public void onCoinsReceived(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
         Log.i(TAG, "onCoinsReceived calling updateBalance");
         updateBalance();
-        populateHistory();
+        if(mPlayer == null) {
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }else if(!mPlayer.isPlaying()){
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }
     }
 
     @Override
     public void onCoinsSent(Wallet wallet, Transaction tx, Coin prevBalance, Coin newBalance) {
-        List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime());
-        populateHistory();
+        if(mPlayer == null) {
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }else if(!mPlayer.isPlaying()){
+            mPlayer = MediaPlayer.create(this, R.raw.chaching);
+            mPlayer.start();
+        }
     }
 
 
@@ -931,7 +982,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                         service.kit.wallet().saveToFile(save);
                         backupDialog.dismiss();
                     } catch (IOException e) {
-                        Log.i(TAG, "Failed to save wallet to:" + save.getAbsolutePath());
+                        Log.i(TAG,"Failed to save wallet to: "+save.getAbsolutePath());
                         e.printStackTrace();
                     }
                 }
@@ -1010,7 +1061,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     public void onWalletUnlockSuccess(KeyCrypter crypter, KeyParameter key) {
         showProgress(PROGRESS_NONE);
-        if (btnOkEnterPin.getTag().toString().equals("send")) {
+        boolean encrypt = true;
+        if(btnOkEnterPin.getTag().toString().equals("send")){
             final boolean isIX = (cbIx.isChecked());
             final String amount = etAmountSending.getText().toString();
             final String recipient = etRecipient.getText().toString();
@@ -1034,8 +1086,14 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
                 importKey(tmpKey);
             }
             tmpKey = null;
+        }else if(btnOkEnterPin.getTag().toString().equals("decrypt")){
+            showToast(getString(R.string.wallet_unencrypted));
+            encrypt = false;
+            if(currentMenu == MENU_OTHER)
+                buildMenuButtons(MENU_OTHER);
         }
-        service.kit.wallet().encrypt(crypter, key);
+        if(encrypt)
+            service.kit.wallet().encrypt(crypter, key);
     }
 
     public void unlockWallet(final String pin) {
@@ -1063,7 +1121,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         if (service.kit.wallet().isEncrypted() && pin != null && !pin.equals("")) {
             unlockWallet(pin);
         }
-
         etEnterPin.setText("");
         enterPinDialog.dismiss();
     }
@@ -1110,7 +1167,7 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
         share.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/temporary_file.jpg"));
         share.putExtra(Intent.EXTRA_SUBJECT, "Dash Payment Request");
         share.putExtra(Intent.EXTRA_TEXT, service.kit.wallet().currentReceiveAddress().toString());
-        startActivity(share);
+        startActivityForResult(share, 4321);
     }
 
     boolean restoringCheckpoint = false;
@@ -1205,7 +1262,6 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
 
     static ProgressDialog progress = null;
-    static boolean ranStartAsync = false;
 
 
     public void showProgress(final int type) {
@@ -1340,6 +1396,8 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     public void updateGUI() {
         updateBalance();
         updateBlockHeight(null);
+        if(gotWallet() && service.kit.wallet().getTransactionsByTime().size() > 0 && service.kit.wallet().getTransactionsByTime().get(0).getConfidence().getDepthInBlocks() < 7)
+            populateHistory(); // we only need to update history if icons change
     }
 
     private void resetEnterWord() {
@@ -1380,16 +1438,19 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
     }
 
     TransactionListAdapter adapter = null;
-
-    public void populateHistory() {
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0, 10));
-                adapter = new TransactionListAdapter(activity, R.layout.layout_history_row, txes);
-                historyListView.setAdapter(adapter);
-            }
-        });
+    public void populateHistory(){
+        if(service != null && service.kit != null && service.kit.wallet() != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    int txCount = service.kit.wallet().getTransactionsByTime().size();
+                    int max = txCount < 10?txCount:10;
+                    List<Transaction> txes = new ArrayList<Transaction>(service.kit.wallet().getTransactionsByTime().subList(0, txCount));
+                    adapter = new TransactionListAdapter(activity, R.layout.layout_history_row, txes);
+                    historyListView.setAdapter(adapter);
+                }
+            });
+        }
     }
 
     @Override
@@ -1399,13 +1460,12 @@ public class DashGui extends Activity implements PeerDataEventListener, PeerConn
 
     @Override
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, final int totalItemCount) {
-        Log.i(TAG, "first: " + firstVisibleItem + "| visible: " + visibleItemCount + "| total: " + totalItemCount);
-        if (firstVisibleItem + visibleItemCount == totalItemCount && service != null && service.kit.wallet().getTransactions(false).size() > totalItemCount + 1) {
+        if(firstVisibleItem+visibleItemCount == totalItemCount && service != null && service.kit.wallet().getTransactions(false).size() > totalItemCount+1) {
             activity.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     Transaction tx = service.kit.wallet().getTransactionsByTime().get(totalItemCount + 1);
-                    if (tx != null)
+                    if(tx != null && adapter != null)
                         adapter.add(tx);
                 }
             });
